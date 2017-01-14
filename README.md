@@ -24,8 +24,6 @@ This is a Hello Wrold program written in C language.
 int main(void)
 {
         # display "Hello, World!" on screen @
-        return 0;
-}
 @
 
 We can use the <puts> function provided by C standard
@@ -42,7 +40,18 @@ has been defined, we need to include stdio.h:
 @ hello world # <main-functio n> ^+
 #include <stdio.h>
 @
+
+If there is not any error occurs, this program should end up returning 0: 
+
+@ hello world # +
+        return 0;
+}
+@
 ```
+
+The above is just example and it does not mean that we should write code like that. 
+
+## Tangle
 
 Using the tangle mode of orez could abstract the source code of C "Hello, World" program:
 
@@ -55,6 +64,31 @@ The more shorter form for the above command is:
 ```console
 $ orez -t -e "hello world" hello-world.orz -o hello-world.c
 ```
+
+If using the `--line_num` or `-l` option could, the output of tangle mode contains the line number of code fragments:
+
+```console
+$ orez -t -l -e "hello world" hello-world.orz -o hello-world.c
+```
+
+The result is as follows:
+
+```c
+#line 22 "hello-world.orz"
+#include <stdio.h>
+#line 5 "hello-world.orz"
+int main(void)
+{
+#line 15 "hello-world.orz"
+        puts("Hello, World!");
+#line 28 "hello-world.orz"
+        return 0;
+}
+```
+
+These line numbers could help us to know the position of a code fragments in the source file, e.g. hello-world.orz.
+
+## Weave
 
 Using the weave mode of orez could convert the hello-world.orz into a YAML document:
 
