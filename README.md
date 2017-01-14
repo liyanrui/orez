@@ -12,7 +12,7 @@ $ make
 $ sudo make install
 ```
 
-## Basic Usage
+## Basic Source Document Format
 
 For example, there is a file named hello-world.orz and its content is as follows:
 
