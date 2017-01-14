@@ -108,9 +108,98 @@ or
 $ orez -w hello-world.orz > hello-world.yml
 ```
 
-You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provide two scripts for ConTeXt and Markdown respectivily. Their usages are as follows:
+You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt and Markdown respectivily. 
+
+The usages of orez-ctx-weave is as follows:
 
 ```console
 $ orez -w hello-world.orz | orez-ctx-weave > hello-world.tex
+```
+
+The reulst is as follows:
+
+```TeX
+This is a Hello Wrold program written in C language.
+
+\startC
+/BTEX\pagereference[helloworld1]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX
+/BTEX\reference[helloworld-mainfunction]{<main-function>}\OrezReference{<main-function>}/ETEX
+int main(void)
+{
+        /BTEX\Callee{\# display\ "Hello,\ World!"\ on\ screen @}\ <\at[displayHelloWorldonscreen]>/ETEX
+
+\stopC
+
+We can use the <puts> function provided by C standard
+library to display some information on screen:
+
+\startC
+/BTEX\pagereference[displayHelloWorldcrlfonscreen]/ETEX/BTEX\CodeFragmentName{@ display\ "Hello,\ World!"\ \crlf
+\ \ on\ screen \#}/ETEX
+puts("Hello, World!");
+/BTEX\OrezSymbol{=>}/ETEX /BTEX\Emission{hello world}\ <\at[helloworld1]>/ETEX
+\stopC
+
+However, in order to convince C compiler the <puts> function
+has been defined, we need to include stdio.h:
+
+\startC
+/BTEX\pagereference[helloworld2]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX /BTEX\in[helloworld-mainfunction]/ETEX /BTEX\OrezSymbol{$\wedge+$}/ETEX
+#include <stdio.h>
+\stopC
+
+If there is not any error occurs, this program should end up returning 0:
+
+\startC
+/BTEX\pagereference[helloworld3]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX /BTEX\OrezSymbol{$+$}/ETEX
+        return 0;
+}
+\stopC
+```
+
+The orez-md-weave depends on the yaml and pygments modules. Its usages is as follows:
+
+```console
 $ orez -w hello-world.orz | orez-md-weave > hello-world.md
+```
+
+The result is:
+
+```markdown
+This is a Hello Wrold program written in C language.
+
+<pre id="helloworld1" class="orez-code-fragment">
+<span class="orez-code-fragment-name">@ hello world #</span>
+<span id="helloworld-mainfunction" class="zero-source-label">&lt;main-function&gt;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+        <a href="#displayHelloWorldonscreen" class="orez-callee-link"># display "Hello, World!" on screen @</a>
+
+</pre>
+
+We can use the <puts> function provided by C standard
+library to display some information on screen:
+
+<pre id="displayHelloWorldonscreen" class="orez-code-fragment">
+<span class="orez-code-fragment-name">@ display "Hello, World!" \
+  on screen #</span>
+<span class="n">puts</span><span class="p">(</span><span class="s">&quot;Hello, World!&quot;</span><span class="p">);</span>
+<span class="orez-symbol">=&gt;</span> <a href="#helloworld1" class="proc-emissions-name">hello world</a>
+</pre>
+
+However, in order to convince C compiler the <puts> function
+has been defined, we need to include stdio.h:
+
+<pre id="helloworld2" class="orez-code-fragment">
+<span class="orez-code-fragment-name">@ hello world #</span>  <a class="orez-target-label" href="#helloworld-mainfunction">&lt;main-functio n&gt;</a>  <span class="orez-symbol">^+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+</pre>
+
+If there is not any error occurs, this program should end up returning 0:
+
+<pre id="helloworld3" class="orez-code-fragment">
+<span class="orez-code-fragment-name">@ hello world #</span>  <span class="orez-symbol">+</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre>
 ```
