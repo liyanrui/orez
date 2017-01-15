@@ -6,10 +6,10 @@ orez: main.c
 
 .PHONY: install uninstall clean
 install:
-	install -c orez orez-ctx-weave orez-md-weave $(prefix)/bin
+	install -c orez orez-ctx orez-md $(prefix)/bin
 uninstall:
 	rm $(prefix)/bin/orez
-	rm $(prefix)/bin/orez-ctx-weave
-	rm $(prefix)/bin/orez-md-weave
+	rm $(prefix)/bin/orez-ctx
+	rm $(prefix)/bin/orez-md
 clean:
 	rm orez
