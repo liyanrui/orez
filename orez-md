@@ -123,6 +123,7 @@ if __name__=="__main__":
             # format code fragment body
             for o_e in cf['CONTENT']:
                 if 'SNIPPET' in o_e:
+                    lang = 'plain'
                     snippet = o_e['SNIPPET'].strip("'")
                     if 'LANG' in cf:
                         lang = cf['LANG'].lower()
@@ -131,7 +132,6 @@ if __name__=="__main__":
                             lang = 'plain'
                     else:
                         lang_mark_warn(cf, "No language mark for me!")
-                        lang = 'plain'
                     lexer = lexers[lang]
                     hl_code = orez_code_highlight(snippet, lexer)
                 elif 'INDENT' in o_e:
