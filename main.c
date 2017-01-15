@@ -954,18 +954,18 @@ static GString *code_frag_to_yaml(GNode *x, GHashTable *table)
                                         yaml_append_key(yaml, "NAME: |-\n", 3);
                                         yaml_append_val(yaml, o_e->content, 4, TRUE);
 #line 2065 "../orez.orz"
-                                        GString *o_key = text_compact(o_e->content);
-                                        OrezTie *o_tie = g_hash_table_lookup(table, o_key);
-                                        if (o_tie->doc_order->len > 1) {
+                                        GString *y_tie_key = text_compact(o_e->content);
+                                        OrezTie *y_tie = g_hash_table_lookup(table, y_tie_key);
+                                        if (y_tie->doc_order->len > 1) {
                                                 yaml_append_key(yaml, "ID_ARRAY:\n", 3);
-                                                for (guint i = 0; i < o_tie->doc_order->len; i++) {
-                                                        GNode *t = g_ptr_array_index(o_tie->doc_order, i);
+                                                for (guint i = 0; i < y_tie->doc_order->len; i++) {
+                                                        GNode *t = g_ptr_array_index(y_tie->doc_order, i);
                                                         OrezElement *oo_e = t->data;
                                                         yaml_append_key(yaml, "- ", 4);
                                                         g_string_append_printf(yaml, "%u\n", i + 1);
                                                 }
                                         }
-                                        g_string_free(o_key, TRUE);
+                                        g_string_free(y_tie_key, TRUE);
 #line 2060 "../orez.orz"
                                 }
                         }
