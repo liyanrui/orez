@@ -54,6 +54,7 @@ def orez_code_highlight(code, lexer):
 def lang_mark_warn(code_frag, info):
     sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
     sys.stderr.write(info)
+    sys.stderr.write('\n')
 
 def format_code_frag_ref(ref):
     name = ref['NAME'].strip("'")
@@ -127,14 +128,12 @@ if __name__=="__main__":
                         lang = cf['LANG'].lower()
                         if lang not in lexers:
                             lang_mark_warn(cf, "There is not lexer for me!")
-                            orez_output(snippet)
-                        else:
-                            lexer = lexers[lang]
-                            hl_code = orez_code_highlight(snippet, lexer)
-                            orez_output(hl_code)
+                            lang = 'plain'
                     else:
                         lang_mark_warn(cf, "No language mark for me!")
-                        orez_output(snippet)
+                        lang = 'plain'
+                    lexer = lexers[lang]
+                    hl_code = orez_code_highlight(snippet, lexer)
                 elif 'INDENT' in o_e:
                     orez_output(o_e['INDENT'])
                 elif 'REF' in o_e:

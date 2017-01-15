@@ -26,6 +26,7 @@ def format_code_frag_ref(ref):
 def lang_mark_warn(code_frag, info):
     sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
     sys.stderr.write(info)
+    sys.stderr.write('\n')
 
 def illegal_code_frag_warning(code_frag):
     sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
