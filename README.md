@@ -1,5 +1,4 @@
 # orez
-
 Orez is a literate programming tool almost without denpendency on any document formatting language and programming language.
 
 ## Installation
@@ -50,7 +49,7 @@ If there is not any error occurs, this program should end up returning 0:
 @
 ```
 
-The above is just an example and it does not mean that we should write code like that. 
+The above is just example and it does not mean that we should write code like that. 
 
 ## Tangle
 
@@ -111,7 +110,7 @@ $ orez -w hello-world.orz > hello-world.yml
 
 You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt and Markdown respectivily. 
 
-The usage of orez-ctx is as follows:
+The usages of orez-ctx is as follows:
 
 ```console
 $ orez -w hello-world.orz | orez-ctx > hello-world.tex
