@@ -134,6 +134,7 @@ if __name__=="__main__":
                         lang_mark_warn(cf, "No language mark for me!")
                     lexer = lexers[lang]
                     hl_code = orez_code_highlight(snippet, lexer)
+                    orez_output(hl_code)
                 elif 'INDENT' in o_e:
                     orez_output(o_e['INDENT'])
                 elif 'REF' in o_e:
