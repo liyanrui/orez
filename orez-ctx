@@ -22,7 +22,6 @@ def format_code_frag_ref(ref):
         orez_output('/ETEX')
     else:  # 源码域名后面是一个 \at 生成的页码
         orez_output('/BTEX\\Callee{\\# %s @}\\ <\\at[%s]>/ETEX' % (name, name_alnum))
-    orez_output('\n')
 
 def lang_mark_warn(code_frag, info):
     sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
@@ -93,9 +92,14 @@ if __name__=="__main__":
                     orez_output(o_e['INDENT'])
                 elif 'REF' in o_e:
                     format_code_frag_ref(o_e['REF'])
+                    orez_output('\n')
                 else:
                     illegal_code_frag_warning(cf)
-            orez_output('\n')
+            
+            # if last element is a piece of code snippet, 
+            # a linebreak should be append
+            if 'SNIPPET' in cf['CONTENT'][-1]:
+                orez_output('\n')
             
             # 格式化出射域
             if 'EMISSIONS' in cf:

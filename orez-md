@@ -65,7 +65,6 @@ def format_code_frag_ref(ref):
     else:  # 源码域名后面是一个 \at 生成的页码
         orez_output('<a href="#%s" class="orez-callee-link"># %s @</a>' 
                     % (name_alnum, name))
-    orez_output('\n')
 
 if __name__=="__main__":
     # 解析 yaml
@@ -140,9 +139,14 @@ if __name__=="__main__":
                     orez_output(o_e['INDENT'])
                 elif 'REF' in o_e:
                     format_code_frag_ref(o_e['REF'])
+                    orez_output('\n')
                 else:
                     illegal_code_frag_warning(cf)
-            orez_output('\n')
+            
+            # if last element is a piece of code snippet, 
+            # a linebreak should be append
+            if 'SNIPPET' in cf['CONTENT'][-1]:
+                orez_output('\n')
             
             # format emissions 
             if 'EMISSIONS' in cf:
