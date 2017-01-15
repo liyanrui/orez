@@ -116,7 +116,7 @@ if __name__=="__main__":
             if 'SOURCE_LABEL' in cf:
                 source_label = cf['SOURCE_LABEL'].strip("'")
                 long_source_label = name_alnum + '-' + make_alnum_text(source_label)
-                orez_output('\n<span id="%s" class="zero-source-label">&lt;%s&gt;</span>'
+                orez_output('\n<span id="%s" class="orez-source-label">&lt;%s&gt;</span>'
                             % (long_source_label, source_label))
             orez_output("\n")
             
