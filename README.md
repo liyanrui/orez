@@ -110,10 +110,10 @@ $ orez -w hello-world.orz > hello-world.yml
 
 You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt and Markdown respectivily. 
 
-The usages of orez-ctx-weave is as follows:
+The usages of orez-ctx is as follows:
 
 ```console
-$ orez -w hello-world.orz | orez-ctx-weave > hello-world.tex
+$ orez -w hello-world.orz | orez-ctx > hello-world.tex
 ```
 
 The reulst is as follows:
@@ -157,10 +157,10 @@ If there is not any error occurs, this program should end up returning 0:
 \stopC
 ```
 
-The orez-md-weave depends on the yaml and pygments modules. Its usages is as follows:
+The orez-md depends on the yaml and pygments modules. Its usages is as follows:
 
 ```console
-$ orez -w hello-world.orz | orez-md-weave > hello-world.md
+$ orez -w hello-world.orz | orez-md > hello-world.md
 ```
 
 The result is:
