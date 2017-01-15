@@ -1098,11 +1098,14 @@ int main(int argc, char **argv)
                 if (!orez_separator) {
                         GString *start = g_string_new(orez_entrance);
                         GList *indents = NULL;
-                        gchar *file_name = orez_output ? orez_output : orez_entrance;
-                        GIOChannel *output = g_io_channel_new_file(file_name, "w",NULL);
+                        GString *t = g_string_new(orez_output ? orez_output : orez_entrance);
+                        GString *file_name = text_compact(t);
+                        GIOChannel *output = g_io_channel_new_file(file_name->str, "w",NULL);
                         orez_tangle(syntax_tree, tie_table, start, &indents, output);
                         g_string_free(start, TRUE);
                         g_io_channel_unref(output);
+                        g_string_free(file_name, TRUE);
+                        g_string_free(t, TRUE);
                 } else {
                         gchar **code_frag_names = g_strsplit(orez_entrance, orez_separator, 0);
                         gchar **file_names = g_strsplit(orez_output ? orez_output : orez_entrance,
