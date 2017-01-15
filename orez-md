@@ -13,7 +13,6 @@ from pygments.lexers import TexLexer
 from pygments.lexers import GnuplotLexer
 from pygments.lexers import TextLexer
 from pygments.lexers import EmacsLispLexer
-from pygments.lexers import M4Lexer
 from pygments.formatters import HtmlFormatter
 
 def make_alnum_text(text):
@@ -81,8 +80,7 @@ if __name__=="__main__":
     lexers = {'c':CLexer, 'c++':CppLexer, 'python':Python3Lexer, 
               'scheme':SchemeLexer, 'lua':LuaLexer, 'tex':TexLexer, 
               'makefile':MakefileLexer, 'gnuplot':GnuplotLexer,
-              'plain':TextLexer, 'elisp':EmacsLispLexer, 
-              'm4':M4Lexer, 'bash':BashLexer}
+              'plain':TextLexer, 'elisp':EmacsLispLexer, 'bash':BashLexer}
 
     for e in x:
         if 'DOC_FRAG' in e:
