@@ -1,0 +1,92 @@
+\startenvironment env-plain
+\usemodule[zhfonts]
+\setupzhfonts[mono][regular=simkai]
+\setupinteraction[state=start,
+                  focus=standard,
+                  color=darkblue, 
+                  contrastcolor=darkblue]
+
+% zero sun 模式输出结果所需要的宏
+\def\Callee#1{\color[middlecyan]{\bf #1}}
+\def\Emission#1{\color[darkyellow]{\bf #1}}
+\def\CodeFragmentName#1{\color[darkred]{#1}}
+\def\OrezSymbol#1{\color[darkgreen]{\bf #1}}
+\def\OrezReference#1{\color[darkgreen]{\bf #1}}
+
+% 抄録环境的设置
+\setuptyping[bodyfont=10pt,escape=yes]
+
+% Bash
+\definetyping[BASH]
+
+% 对于 pretty-c 的抄録环境，套上文本框之后，尾部会莫名其妙的多出来一个空白行
+% 消除这个空白行的办法是将 after 设为 \vskip0pt\blank[-1em]，真正起作用的是
+% \blank，但是那个 \vskip 必不可少，它的值可以随便取。
+% 对于文本框内的文本来说，若让其首尾各空出 0.5 行，只能像下面这样设。也许很久以后我会
+% 忘记这个设定，所以要修改下面的设置时，需要多尝试几次，看看效果！
+% 这个 bug 应该是 ConTeXt 官方的代码高亮机制导致的。
+\usemodule[pretty-c]
+%\definetextbackground[verbatim]
+%                     [location=paragraph,
+%                      framecolor=darkgray,
+%                      background=screen,
+%                      rulethickness=0.75pt]
+%\setuptyping[C][bodyfont=10pt,
+%                escape=yes,
+%                blank=small,
+%                margin=1em,
+%                before={\vskip1em\starttextbackground[verbatim]\vskip0.5em},
+%                after={\vskip0pt\blank[-0.6em]\stoptextbackground\vskip1em}]
+
+% 书签
+\setupinteractionscreen[option=bookmark]
+\placebookmarks[section][section]
+
+% 参考文献
+\setupbibtex[database=ref]
+\setuppublications[alternative=lyr]
+\def\Cite#1{\high{\small\cite[#1]}}
+
+% ascii 数学公式模块
+\usemodule[asciimath]
+
+% 适合 A4 纸张打印的版式
+\setuplayout[backspace=.13\paperwidth,
+             width=.74\paperwidth,
+             topspace=.05\paperheight,
+             height=.9\paperheight]
+\setuppagenumbering[alternative=singlesided, location=right]
+
+% 标题
+\setupheads[indentnext=yes]
+\definepagebreak[headpagebreak][yes, header, footer, odd]
+\setuphead[chapter,title][style=\bfd]
+\setuphead[section, subject][style=\bfb]
+\setuphead[subsection, subsubject][style=\bfa]
+
+% 段落
+\setupindenting[first,always,2em]
+\setupinterlinespace[line=1.5em]
+
+% 脚注
+\startsetups footnote:hanzi
+  \setscript[hanzi]
+\stopsetups
+\setupnote[footnote][setups={footnote:hanzi}]
+
+% 列表
+\setupitemize[packed]
+
+% 目录
+\setupcombinedlist[content][alternative=c,interaction=pagenumber]
+\setuplist[section][margin=2em,]
+
+% misc
+\setupheadtext[en][pubs=参考文献]
+\setupheadtext[en][content=目录]
+\setupheadtext[en][index=索引]
+\setuplabeltext[en][figure=图\;]
+\setuplabeltext[en][table=表\;]
+\setupcaptions[style=\tfx,headstyle=\normal,align={broad,middle}]
+
+\stopenvironment
