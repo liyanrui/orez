@@ -109,7 +109,7 @@ or
 $ orez -w hello-world.orz > hello-world.yml
 ```
 
-You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt and Markdown respectivily. 
+You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt MkIV and Markdown respectivily. 
 
 The usages of orez-ctx is as follows:
 
