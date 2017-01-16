@@ -879,14 +879,14 @@ static GString *code_frag_to_yaml(GNode *x, GHashTable *table)
                 for (guint i = 0; i < x_tie->emissions->len; i++) {
                         GNode *emission = g_ptr_array_index(x_tie->emissions, i);
                         OrezElement *o_e = g_node_first_child(emission)->data;
-                        GString *o_key = text_compact(o_e->content);
-                        OrezTie *o_tie = g_hash_table_lookup(table, o_key);
+                        GString *y_tie_key = text_compact(o_e->content);
+                        OrezTie *y_tie = g_hash_table_lookup(table, y_tie_key);
                         yaml_append_key(yaml, "- EMISSION:\n", 2);
-                        for (guint j = 0; j < o_tie->doc_order->len; j++) {
-                                if (emission == g_ptr_array_index(o_tie->doc_order, j)) {
+                        for (guint j = 0; j < y_tie->doc_order->len; j++) {
+                                if (emission == g_ptr_array_index(y_tie->doc_order, j)) {
                                         yaml_append_key(yaml, "NAME: |-\n", 3);
                                         yaml_append_val(yaml, o_e->content, 4, TRUE);
-                                        if (o_tie->doc_order->len > 1) {
+                                        if (y_tie->doc_order->len > 1) {
                                                 /* output ID for code fragment of same name */
                                                 yaml_append_key(yaml, "ID: ", 3);
                                                 g_string_append_printf(yaml, "%u\n", j + 1);
@@ -894,7 +894,7 @@ static GString *code_frag_to_yaml(GNode *x, GHashTable *table)
                                         break;
                                 }
                         }
-                        g_string_free(o_key, TRUE);
+                        g_string_free(y_tie_key, TRUE);
                 }
         }
         return yaml;
@@ -1094,72 +1094,55 @@ int main(int argc, char **argv)
         GNode *syntax_tree = orez_create_syntax_tree(argv[1]);
         GHashTable *tie_table = orez_create_hash_table(syntax_tree);
         if (orez_tangle_mode) {
+                GPtrArray *entrances = g_ptr_array_new();
+                GPtrArray *file_names = g_ptr_array_new();
+                gchar *u = orez_output ? orez_output : orez_entrance;
                 if (!orez_separator) {
-                        GString *start = g_string_new(orez_entrance);
-                        GList *indents = NULL;
-                        GString *t = g_string_new(orez_output ? orez_output : orez_entrance);
-                        GString *file_name = text_compact(t);
-                        GIOChannel *output = g_io_channel_new_file(file_name->str, "w",NULL);
-                        orez_tangle(syntax_tree, tie_table, start, &indents, output);
-                        g_string_free(start, TRUE);
-                        g_io_channel_unref(output);
-                        g_string_free(file_name, TRUE);
+                        GString *t = g_string_new(u);
+                        g_ptr_array_add(entrances, g_string_new(orez_entrance));
+                        g_ptr_array_add(file_names, text_compact(t));
                         g_string_free(t, TRUE);
                 } else {
-                        gchar **code_frag_names = g_strsplit(orez_entrance, orez_separator, 0);
-                        gchar **file_names = g_strsplit(orez_output ? orez_output : orez_entrance,
-                                                        orez_separator,
-                                                        0);
-                        guint m = 0;
-                        guint n  = 0;
-                        for (gchar **si = code_frag_names; *si != NULL; si++) m++;
-                        for (gchar **si = file_names; *si != NULL; si++) n++;
-                        if (m != n) g_error("Entrances can not match Outputs!");
+                        gchar **cf_names = g_strsplit(orez_entrance, orez_separator, 0);
+                        gchar **v = g_strsplit(u, orez_separator, 0);
+                        guint m = 0; for (gchar **s = cf_names; *s != NULL; s++) m++;
+                        guint n = 0; for (gchar **s = v; *s != NULL; s++) n++;
                         for (guint i = 0; i < m; i++) {
-                                GString *start = g_string_new(code_frag_names[i]);
-                                GList *indents = NULL;
-                                GString *t = g_string_new(file_names[i]);
-                                GString *file_name = text_compact(t);
-                                GIOChannel *output = g_io_channel_new_file(file_name->str,
-                                                                           "w",
-                                                                           NULL);
-                                orez_tangle(syntax_tree, tie_table, start, &indents, output);
-                                g_string_free(file_name, TRUE);
+                                GString *t = g_string_new(v[i]);
+                                g_ptr_array_add(entrances, g_string_new(cf_names[i]));
+                                g_ptr_array_add(file_names, text_compact(t));
                                 g_string_free(t, TRUE);
-                                g_string_free(start, TRUE);
-                                g_io_channel_unref(output);
                         }
-                        g_strfreev(file_names);
-                        g_strfreev(code_frag_names);
+                        g_strfreev(v);
+                        g_strfreev(cf_names);
                 }
+                for (guint i = 0; i < file_names->len; i++) {
+                        GString *start = g_ptr_array_index(entrances, i);
+                        GString *file_name = g_ptr_array_index(file_names, i);
+                        GIOChannel *output = g_io_channel_new_file(file_name->str, "w", NULL);
+                        GList *indents = NULL;
+                        orez_tangle(syntax_tree, tie_table, start, &indents, output);
+                        g_io_channel_unref(output);
+                        g_string_free(file_name, TRUE);
+                        g_string_free(start, TRUE);
+                }
+                g_ptr_array_free(file_names, TRUE);
+                g_ptr_array_free(entrances, TRUE);
         } else {
                 clean_syntax_tree(syntax_tree);
                 spread_lang_mark(syntax_tree, tie_table);
-                if (!orez_output) {
-                        EVERY_BRANCH(syntax_tree, it) {
-                                OrezElement *e = it->data;
-                                GString *s = NULL;
-                                if (e->type == OREZ_DOC_FRAG) s = doc_frag_to_yaml(it);
-                                else s = code_frag_to_yaml(it, tie_table);
-                                g_print("%s", s->str);
-                                g_string_free(s, TRUE);
-                        }
-                } else {
-                        GIOChannel *output = g_io_channel_new_file(orez_output, "w", NULL);
-                        EVERY_BRANCH(syntax_tree, it) {
-                                OrezElement *e = it->data;
-                                GString *s = NULL;
-                                if (e->type == OREZ_DOC_FRAG) s = doc_frag_to_yaml(it);
-                                else s = code_frag_to_yaml(it, tie_table);
-                                g_io_channel_write_chars(output,
-                                                         s->str,
-                                                         -1,
-                                                         NULL,
-                                                         NULL);
-                                g_string_free(s, TRUE);
-                        }
-                        g_io_channel_unref(output);
+                GIOChannel *output = NULL;
+                if (orez_output) output = g_io_channel_new_file(orez_output, "w", NULL);
+                EVERY_BRANCH(syntax_tree, it) {
+                        OrezElement *e = it->data;
+                        GString *s = NULL;
+                        if (e->type == OREZ_DOC_FRAG) s = doc_frag_to_yaml(it);
+                        else s = code_frag_to_yaml(it, tie_table);
+                        if (output) g_io_channel_write_chars(output, s->str, -1, NULL, NULL);
+                        else g_print("%s", s->str);
+                        g_string_free(s, TRUE);
                 }
+                if (orez_output) g_io_channel_unref(output);
         }
         orez_destroy_hash_table(tie_table);
         orez_destroy_syntax_tree(syntax_tree);
