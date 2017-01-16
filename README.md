@@ -127,7 +127,6 @@ This is a Hello Wrold program written in C language.
 int main(void)
 {
         /BTEX\Callee{\# display\ "Hello,\ World!"\ on\ screen @}\ <\at[displayHelloWorldonscreen]>/ETEX
-
 \stopC
 
 We can use the <puts> function provided by C standard
@@ -170,11 +169,10 @@ This is a Hello Wrold program written in C language.
 
 <pre id="helloworld1" class="orez-code-fragment">
 <span class="orez-code-fragment-name">@ hello world #</span>
-<span id="helloworld-mainfunction" class="zero-source-label">&lt;main-function&gt;</span>
+<span id="helloworld-mainfunction" class="orez-source-label">&lt;main-function&gt;</span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="p">{</span>
         <a href="#displayHelloWorldonscreen" class="orez-callee-link"># display "Hello, World!" on screen @</a>
-
 </pre>
 
 We can use the <puts> function provided by C standard
