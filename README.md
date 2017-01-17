@@ -272,4 +272,4 @@ If there is not any error occurs, this program should end up returning 0:
 
 ## More Details
 
-Please see https://github.com/liyanrui/orez/tree/master/example
+Please see https://github.com/liyanrui/orez/tree/master/examples
