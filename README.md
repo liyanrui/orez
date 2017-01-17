@@ -119,7 +119,7 @@ The content of hello-world.yml looks like this:
         'hello world'
     ID: 1
     LANG: C
-    SOURCE_LABEL: |-
+    LABEL: |-
         'main-function'
     CONTENT:
         - SNIPPET: |-
@@ -154,7 +154,7 @@ The content of hello-world.yml looks like this:
         'hello world'
     ID: 2
     LANG: C
-    TARGET_LABEL: |-
+    LABEL_REF: |-
         'main-functio n'
     OPERATOR: ^+
     CONTENT:
@@ -237,7 +237,7 @@ This is a Hello Wrold program written in C language.
 
 <pre id="helloworld1" class="orez-code-fragment">
 <span class="orez-code-fragment-name">@ hello world #</span>
-<span id="helloworld-mainfunction" class="orez-source-label">&lt;main-function&gt;</span>
+<span id="helloworld-mainfunction" class="orez-label">&lt;main-function&gt;</span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="p">{</span>
         <a href="#displayHelloWorldonscreen" class="orez-callee-link"># display "Hello, World!" on screen @</a>
@@ -257,7 +257,7 @@ However, in order to convince C compiler the <puts> function
 has been defined, we need to include stdio.h:
 
 <pre id="helloworld2" class="orez-code-fragment">
-<span class="orez-code-fragment-name">@ hello world #</span>  <a class="orez-target-label" href="#helloworld-mainfunction">&lt;main-functio n&gt;</a>  <span class="orez-symbol">^+</span>
+<span class="orez-code-fragment-name">@ hello world #</span>  <a class="orez-label-ref" href="#helloworld-mainfunction">&lt;main-functio n&gt;</a>  <span class="orez-symbol">^+</span>
 <span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 </pre>
 

@@ -68,19 +68,19 @@ if __name__=="__main__":
             
             # 格式化运算符域
             if 'OPERATOR' in cf:
-                if 'TARGET_LABEL' in cf:
-                    target_label = cf['TARGET_LABEL'].strip("'")
-                    long_target_label = name_alnum + '-' + make_alnum_text(target_label)
-                    orez_output(' /BTEX\\in[{0}]/ETEX'.format(long_target_label))
+                if 'LABEL_REF' in cf:
+                    label_ref = cf['LABEL_REF'].strip("'")
+                    long_label_ref = name_alnum + '-' + make_alnum_text(label_ref)
+                    orez_output(' /BTEX\\in[{0}]/ETEX'.format(long_label_ref))
                 orez_output(' /BTEX\\OrezSymbol{$%s$}/ETEX'
                             % cf['OPERATOR'].replace('^', '\\wedge'))
             
             # 格式化源标签，与运算符域的格式化代码有必须的耦合
-            if 'SOURCE_LABEL' in cf:
-                source_label = cf['SOURCE_LABEL'].strip("'")
-                long_source_label = name_alnum + '-' + make_alnum_text(source_label)
+            if 'LABEL' in cf:
+                label = cf['LABEL'].strip("'")
+                long_label = name_alnum + '-' + make_alnum_text(label)
                 orez_output('\n/BTEX\\reference[%s]{<%s>}\\OrezReference{<%s>}/ETEX' \
-                            % (long_source_label, source_label, source_label))
+                            % (long_label, label, label))
             
             # 代码片段头部与体之间应该有个换行
             orez_output("\n")

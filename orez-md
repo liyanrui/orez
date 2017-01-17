@@ -105,19 +105,19 @@ if __name__=="__main__":
             
             # format target label and operator
             if 'OPERATOR' in cf:
-                if 'TARGET_LABEL' in cf:
-                    target_label = cf['TARGET_LABEL'].strip("'")
-                    long_target_label = name_alnum + '-' + make_alnum_text(target_label)
-                    orez_output('  <a class="orez-target-label" ')
-                    orez_output('href="#{0}">&lt;{1}&gt;</a>'.format(long_target_label, target_label))
+                if 'LABEL_REF' in cf:
+                    label_ref = cf['LABEL_REF'].strip("'")
+                    long_label_ref = name_alnum + '-' + make_alnum_text(label_ref)
+                    orez_output('  <a class="orez-label-ref" ')
+                    orez_output('href="#{0}">&lt;{1}&gt;</a>'.format(long_label_ref, label_ref))
                 orez_output('  <span class="orez-symbol">{0}</span>'.format(cf['OPERATOR']))
             
             # format source label
-            if 'SOURCE_LABEL' in cf:
-                source_label = cf['SOURCE_LABEL'].strip("'")
-                long_source_label = name_alnum + '-' + make_alnum_text(source_label)
-                orez_output('\n<span id="%s" class="orez-source-label">&lt;%s&gt;</span>'
-                            % (long_source_label, source_label))
+            if 'LABEL' in cf:
+                label = cf['LABEL'].strip("'")
+                long_label = name_alnum + '-' + make_alnum_text(label)
+                orez_output('\n<span id="%s" class="orez-label">&lt;%s&gt;</span>'
+                            % (long_label, label))
             orez_output("\n")
             
             # format code fragment body

@@ -5,10 +5,10 @@ typedef enum {
         OREZ_DOC_FRAG,
         OREZ_CODE_FRAG,
         OREZ_CF_NAME,
-        OREZ_CF_TARGET_LABEL,
+        OREZ_CF_LABEL_REF,
         OREZ_CF_LANG_MARK,
         OREZ_CF_OPERATOR,
-        OREZ_CF_SOURCE_LABEL,
+        OREZ_CF_LABEL,
         OREZ_CF_BODY,
         OREZ_CF_SNIPPET,
         OREZ_CF_REF,
@@ -304,7 +304,7 @@ static void parse_head_of_code_fragment(GNode *code_frag_node)
                                                         &line_offset,
                                                         ucs_lt,
                                                         ucs_gt,
-                                                        OREZ_CF_TARGET_LABEL);
+                                                        OREZ_CF_LABEL_REF);
                 if (target_label) g_node_append_data(code_frag_node, target_label);
         }
         skip_spaces_and_tabs(&cursor, end);
@@ -341,7 +341,7 @@ static void parse_head_of_code_fragment(GNode *code_frag_node)
                                                                 &line_offset,
                                                                 ucs_lt,
                                                                 ucs_gt,
-                                                                OREZ_CF_SOURCE_LABEL);
+                                                                OREZ_CF_LABEL);
                         if (source_label) g_node_append_data(code_frag_node, source_label);
                         skip_spaces_and_tabs(&cursor, end);
                         if (g_utf8_get_char(cursor) == ucs_linebreak) {
@@ -583,7 +583,7 @@ static void hash_table_wrap(GHashTable *table, GNode *cf_node)
         GString *operator = NULL;
         EVERY_BRANCH(cf_node, it) {
                 OrezElement *e = it->data;
-                if (e->type == OREZ_CF_TARGET_LABEL) target_label = e->content;
+                if (e->type == OREZ_CF_LABEL_REF) target_label = e->content;
                 else if (e->type == OREZ_CF_OPERATOR) {
                         operator = e->content;
                         break;
@@ -607,7 +607,7 @@ static void hash_table_wrap(GHashTable *table, GNode *cf_node)
                         GNode *node_i = g_ptr_array_index(tie->prog_order,i);
                         EVERY_BRANCH(node_i, it) {
                                 OrezElement *e = it->data;
-                                if (e->type == OREZ_CF_SOURCE_LABEL) {
+                                if (e->type == OREZ_CF_LABEL) {
                                         GString *s = text_compact(e->content);
                                         if (!g_string_equal(s, t)) g_string_free(s, TRUE);
                                         else {
@@ -824,16 +824,16 @@ static GString *code_frag_to_yaml(GNode *x, GHashTable *table)
                         yaml_append_key(yaml, "LANG: ", 1);
                         yaml_append_val(yaml, e->content, 0, FALSE);
                         break;
-                case OREZ_CF_TARGET_LABEL:
-                        yaml_append_key(yaml, "TARGET_LABEL: |-\n", 1);
+                case OREZ_CF_LABEL_REF:
+                        yaml_append_key(yaml, "LABEL_REF: |-\n", 1);
                         yaml_append_val(yaml, e->content, 2, TRUE);
                         break;
                 case OREZ_CF_OPERATOR:
                         yaml_append_key(yaml, "OPERATOR: ", 1);
                         yaml_append_val(yaml, e->content, 0, FALSE);
                         break;
-                case OREZ_CF_SOURCE_LABEL:
-                        yaml_append_key(yaml, "SOURCE_LABEL: |-\n", 1);
+                case OREZ_CF_LABEL:
+                        yaml_append_key(yaml, "LABEL: |-\n", 1);
                         yaml_append_val(yaml, e->content, 2, TRUE);
                         break;
                 case OREZ_CF_BODY:
