@@ -109,6 +109,73 @@ or
 $ orez -w hello-world.orz > hello-world.yml
 ```
 
+The content of hello-world.yml looks like this:
+
+```YAML
+- DOC_FRAG: |-
+    'This is a Hello Wrold program written in C language.'
+- CODE_FRAG:
+    NAME: |-
+        'hello world'
+    ID: 1
+    LANG: C
+    SOURCE_LABEL: |-
+        'main-function'
+    CONTENT:
+        - SNIPPET: |-
+            'int main(void)
+            {
+            '
+        - INDENT: '        '
+        - REF:
+            NAME: |-
+                'display "Hello, World!" on screen'
+- DOC_FRAG: |-
+    'We can use the <puts> function provided by C standard
+    library to display some information on screen:'
+- CODE_FRAG:
+    NAME: |-
+        'display "Hello, World!" \
+          on screen'
+    LANG: C
+    CONTENT:
+        - SNIPPET: |-
+            'puts("Hello, World!");'
+    EMISSIONS:
+        - EMISSION:
+            NAME: |-
+                'hello world'
+            ID: 1
+- DOC_FRAG: |-
+    'However, in order to convince C compiler the <puts> function
+    has been defined, we need to include stdio.h:'
+- CODE_FRAG:
+    NAME: |-
+        'hello world'
+    ID: 2
+    LANG: C
+    TARGET_LABEL: |-
+        'main-functio n'
+    OPERATOR: ^+
+    CONTENT:
+        - SNIPPET: |-
+            '#include <stdio.h>'
+- DOC_FRAG: |-
+    'If there is not any error occurs, this program should end up returning 0:'
+- CODE_FRAG:
+    NAME: |-
+        'hello world'
+    ID: 3
+    LANG: C
+    OPERATOR: +
+    CONTENT:
+        - SNIPPET: |-
+            '        return 0;
+            }'
+- DOC_FRAG: |-
+    ''
+```
+
 You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt MkIV and Markdown respectivily. 
 
 The usages of orez-ctx is as follows:
