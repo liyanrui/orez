@@ -1,6 +1,6 @@
 # Orez
 
-Orez is a literate programming tool almost without denpendency on any document formatting language and programming language.
+Orez is a literate programming tool almost without dependency on any document formatting language and programming language.
 
 ## Installation
 
