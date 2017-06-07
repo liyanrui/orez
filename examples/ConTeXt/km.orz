@@ -1,4 +1,4 @@
-\environment zero-style
+\environment orez-style
 
 \starttext
 \title{$k$ 均值聚类}
@@ -295,8 +295,8 @@ agn_tree_foreach(class_tree, class) {
 \starttyping
 $ mkdir km-test
 $ cd km-test
-$ wget http://192.168.0.7:8080/meta-doc/agn_km.zero -O agn_km.zero
-$ zero -m night -e "gen-km-src.sh" agn_km.zero
+$ wget http://192.168.0.7:8080/meta-doc/agn_km.orz -O agn_km.orz
+$ orez -t -e "gen-km-src.sh" agn_km.orz
 $ sh ./gen-km-src.sh
 \stoptyping
 
@@ -377,21 +377,21 @@ void agn_km_classes_free(AgnTree *class_tree);
 #!/bin/bash
 LOCATION="http://192.168.0.7:8080"
 for i in array list tree ; do
-    wget $LOCATION/meta-doc/agn_${i}.zero -O agn_${i}.zero
-    zero -m night -e "agn_${i}.h, agn_${i}.c" agn_${i}.zero
+    wget $LOCATION/meta-doc/agn_${i}.orz -O agn_${i}.orz
+    orez -t -s "," -e "agn_${i}.h, agn_${i}.c" agn_${i}.orz
 done
 
-wget $LOCATION/meta-doc/agn_km.zero -O agn_km.zero
+wget $LOCATION/meta-doc/agn_km.orz -O agn_km.orz
 POINTS_KM="agn_km.h, agn_km.c, km_test.c"
-zero -m night -e "$POINTS_KM" -o "$POINTS_KM" agn_km.zero
+orez -t -s "," -e "$POINTS_KM" agn_km.orz
 
-wget $LOCATION/meta-doc/agn_m4_macros.zero -O agn_m4_macros.zero
-zero -e "agn_m4_macros.m4, agn-m4.sh" agn_m4_macros.zero
+wget $LOCATION/meta-doc/agn_m4_macros.orz -O agn_m4_macros.orz
+orez -t -s "," -e "agn_m4_macros.m4, agn-m4.sh" agn_m4_macros.orz
 sed -i '/[[:blank:]]*#line.*/d' ./agn-m4.sh
 chmod +x agn-m4.sh
 
-wget $LOCATION/meta-doc/agn_point.zero -O agn_point.zero
-for i in h c ; do ./agn-m4.sh agn_point.zero agn_point.${i}_T ; done
+wget $LOCATION/meta-doc/agn_point.orz -O agn_point.orz
+for i in h c ; do ./agn-m4.sh agn_point.orz agn_point.${i}_T ; done
 
 wget $LOCATION/files/foo -O foo
 @
