@@ -301,7 +301,7 @@ agn_tree_foreach(class_tree, class) {
         sprintf(of_name, "%s-%ld.asc", argv[2], k);
         FILE *fp = fopen(of_name, "w");
         agn_tree_foreach(class, it) {
-                agn_point_print(fp, points->body[*(size_t *)(it->data)], " ");
+                agn_point_print(points->body[*(size_t *)(it->data)], fp, " ");
                 fprintf(fp, "\n");
         }
         fclose(fp);
@@ -315,7 +315,7 @@ agn_tree_foreach(class_tree, class) {
 \starttyping
 $ mkdir km-test
 $ cd km-test
-$ wget http://192.168.0.7:8080/meta-doc/agn_km.orz -O agn_km.orz
+$ wget http://192.168.3.7:8080/meta-doc/agn_km.orz -O agn_km.orz
 $ orez -t -e "gen-km-src.sh" agn_km.orz
 $ sh ./gen-km-src.sh
 \stoptyping
@@ -324,7 +324,8 @@ $ sh ./gen-km-src.sh
 
 \starttyping
 $ gcc -std=c11 -Wall -pedantic -g -I./ \
-  agn_array.c agn_list.c agn_tree.c agn_km.c agn_point.c km_test.c -o km-test
+      agn_{array,list,tree,point,vector,linear_algebra,points,km}.c km_test.c \
+      -o km-test -lm -lgsl -lgslcblas
 \stoptyping
 
 在 valgrind 环境中执行 km-test：
@@ -368,7 +369,7 @@ _若要提高聚类过程的计算效率，可以对 \type{calsses_stablized} �
 #ifndef AGN_KM_H
 #define AGN_KM_H
 #include <agn_tree.h>
-#include <agn_point.h>
+#include <agn_points.h>
 \stopC
 
 
@@ -406,8 +407,9 @@ void agn_km_classes_free(AgnTree *class_tree);
 \startBASH
 /BTEX\pagereference[genkmsrcsh]/ETEX/BTEX\CodeFragmentName{@ gen-km-src.sh \#}/ETEX
 #!/bin/bash
-LOCATION="http://192.168.0.7:8080"
-for i in array list tree ; do
+LOCATION="http://192.168.3.7:8080"
+for i in array list tree point vector linear_algebra points
+do
     wget $LOCATION/meta-doc/agn_${i}.orz -O agn_${i}.orz
     orez -t -s "," -e "agn_${i}.h, agn_${i}.c" agn_${i}.orz
 done
@@ -415,14 +417,6 @@ done
 wget $LOCATION/meta-doc/agn_km.orz -O agn_km.orz
 POINTS_KM="agn_km.h, agn_km.c, km_test.c"
 orez -t -s "," -e "$POINTS_KM" agn_km.orz
-
-wget $LOCATION/meta-doc/agn_m4_macros.orz -O agn_m4_macros.orz
-orez -t -s "," -e "agn_m4_macros.m4, agn-m4.sh" agn_m4_macros.orz
-sed -i '/[[:blank:]]*#line.*/d' ./agn-m4.sh
-chmod +x agn-m4.sh
-
-wget $LOCATION/meta-doc/agn_point.orz -O agn_point.orz
-for i in h c ; do ./agn-m4.sh agn_point.orz agn_point.${i}_T ; done
 
 wget $LOCATION/files/foo -O foo
 \stopBASH
@@ -474,7 +468,7 @@ static void empty_classes(AgnTree *class_tree)
 
 \startC
 #define agn_tree_foreach(tree, it) \
-        for (AgnTree *it = tree->lower; it != NULL; it = it->next)
+        for (AgnTree *it = tree->lower; it; it = it->next)
 \stopC
 
 \noindent 因此上述代码中用于释放树结点的迭代过程的代码：
@@ -488,7 +482,7 @@ agn_tree_foreach(class, member) {
 \noindent 会被展开为：
 
 \startC
-for (AgnTree *member = class->lower; member != NULL; member = member->next) {
+for (AgnTree *member = class->lower; member; member = member->next) {
         agn_tree_free(member);
 }
 \stopC
@@ -499,11 +493,11 @@ for (AgnTree *member = class->lower; member != NULL; member = member->next) {
 
 \startC
 agn_tree_foreach(class_tree, class) {
-        AgnTree *member = class->lower;
-        while (member) {
-                AgnTree *next_member = member->next;
+
+        for (AgnTree *member = class->lower; member; ) {
+                AgnTree *next = member->next;
                 agn_tree_free(member);
-                member = next_member;
+                member = next;
         }
         class->lower = NULL;
 }
