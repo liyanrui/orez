@@ -13,7 +13,7 @@ def orez_output(text):
     sys.stdout.write(text)
 
 def format_code_frag_ref(ref):
-    name = ref['NAME'].strip("'").replace('\\', '\\crlf').replace(' ', '\\ ')
+    name = ref['NAME'].strip("'").replace('\\', '\\blank[0em]').replace(' ', '\\ ')
     name_alnum = make_alnum_text(name)
     if 'ID_ARRAY' in ref:
         orez_output('/BTEX\\Callee{\\# %s @}' % name)
@@ -56,7 +56,7 @@ if __name__=="__main__":
                 orez_output('\\starttyping\n')
             
             # 格式化代码段名称
-            name = cf['NAME'].strip("'").replace('\\', '\\crlf')
+            name = cf['NAME'].strip("'").replace('\\', '\\blank[0em]')
             name_alnum = make_alnum_text(name)
             if 'ID' in cf:
                 orez_output('/BTEX\\pagereference'

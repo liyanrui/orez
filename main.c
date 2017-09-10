@@ -2,7 +2,7 @@
 #include <locale.h>
 #include <string.h>
 typedef enum {
-           OREZ_DOC_FRAG,
+        OREZ_DOC_FRAG,
         OREZ_CODE_FRAG,
         OREZ_CF_NAME,
         OREZ_CF_LABEL_REF,
@@ -165,11 +165,11 @@ static OrezElementType infer_type_of_next_element(GIOChannel *input,
 static GNode *stage_1st(gchar *file_name)
 {
         GNode *root = g_node_new(file_name);
-              GIOChannel *input = g_io_channel_new_file(file_name, "r", NULL);
+        GIOChannel *input = g_io_channel_new_file(file_name, "r", NULL);
         if (!input) {
                 g_error("Failed to open the input file %s to orez!", file_name);
         }
-          gsize line_count = 1; OrezElement *last = NULL;
+        gsize line_count = 1; OrezElement *last = NULL;
         gunichar c; GIOStatus status;
         last = g_slice_new(OrezElement);
         last->type = OREZ_DOC_FRAG;
@@ -184,14 +184,14 @@ static GNode *stage_1st(gchar *file_name)
                         gsize line_num_bak = line_count;
                         GString *cache = g_string_new(NULL);
                         OrezElementType x = infer_type_of_next_element(input, cache, &line_count);
-                                                last = g_slice_new(OrezElement);
+                        last = g_slice_new(OrezElement);
                         last->type = x;
                         last->line_num = line_num_bak;
                         last->content = cache;
                         g_node_append_data(root, last);
                 }
         }
-                if (last->content && last->content->len > 0) {
+        if (last->content && last->content->len > 0) {
                 gchar *end = g_utf8_prev_char(TEXT_TAIL(last->content));
                 c = g_utf8_get_char(end);
                 if (c != ucs_linebreak) g_string_append(last->content, utf8_linebreak);
@@ -452,7 +452,12 @@ GString *cut_out_indent(GString *text)
         gchar *t = g_utf8_prev_char(TEXT_TAIL(text));
         while (1) {
                 gunichar c = g_utf8_get_char(t);
-                if (c == ucs_linebreak) {
+                if (t == h) { /* text is a blank line
+                                 or all characets are spaces */
+                        g_string_free(indent, TRUE);
+                        indent = text;
+                        break;
+                } else if (c == ucs_linebreak) {
                         t = g_utf8_next_char(t);
                         g_string_truncate(text, text->len - strlen(t));
                         break;
@@ -466,10 +471,19 @@ GString *cut_out_indent(GString *text)
 static void parse_code_frag_body(GNode *body)
 {
         OrezElement *e = body->data;
+        if (e->content->len == 0) { /* e->content is empty */
+                OrezElement *empty_e = g_slice_new(OrezElement);
+                empty_e->type = OREZ_CF_SNIPPET;
+                empty_e->line_num = e->line_num;
+                empty_e->content = e->content;
+                g_node_append_data(body, empty_e);
+                e->content = NULL;
+                return;
+        }
         gchar *cursor = TEXT_HEAD(e->content);
         gchar *end = TEXT_TAIL(e->content);
-        gsize line_offset = 0;
         OrezElement *last = NULL;
+        gsize line_offset = 0;
         while (cursor != end) {
                 gunichar c = g_utf8_get_char(cursor);
                 cursor = g_utf8_next_char(cursor);
@@ -500,7 +514,7 @@ static void parse_code_frag_body(GNode *body)
                                         last->content = indent;
                                         g_node_append_data(body, last);
                                 }
-                                                                last = g_slice_new(OrezElement);
+                                last = g_slice_new(OrezElement);
                                 last->type = OREZ_CF_REF;
                                 last->line_num = e->line_num + line_offset_bak;
                                 last->content = cache;
@@ -1101,7 +1115,7 @@ int main(int argc, char **argv)
                                 "the start of thread to be tangled");
                 }
         }
-                GNode *syntax_tree = orez_create_syntax_tree(argv[1]);
+        GNode *syntax_tree = orez_create_syntax_tree(argv[1]);
         GHashTable *tie_table = orez_create_hash_table(syntax_tree);
         if (orez_tangle_mode) {
                 GPtrArray *entrances = g_ptr_array_new();

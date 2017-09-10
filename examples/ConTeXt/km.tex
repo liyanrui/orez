@@ -69,7 +69,7 @@ static AgnTree *km_init(AgnArray *points, size_t K)
 {
         size_t *indices = generate_indices(K, 0, points->n - 1);
         /BTEX\Callee{\# 初始化种类中心\ ->\ init_centers @}\ <\at[初始化种类中心initcenters]>/ETEX
-        /BTEX\Callee{\# 初始化种类树\ ->\ class_tree @}\ <\at[初始化种类树classtree]>/ETEX
+                /BTEX\Callee{\# 初始化种类树\ ->\ class_tree @}\ <\at[初始化种类树classtree]>/ETEX
         agn_array_free(init_centers);
         free(indices);
         return class_tree;
@@ -176,7 +176,7 @@ AgnTree *agn_km_classify(AgnArray *points, size_t K)
 static bool class_tree_stablized(AgnTree *class_tree, AgnArray *points)
 {
         /BTEX\Callee{\# 生成新旧种类中心集合\ ->\ centers\ 与\ new_centers @}\ <\at[生成新旧种类中心集合centers与newcenters]>/ETEX
-        /BTEX\Callee{\# 判断\ centers\ 与\ new_centers\ 是否相同\ ->\ stablized @}\ <\at[判断centers与newcenters是否相同stablized]>/ETEX
+                /BTEX\Callee{\# 判断\ centers\ 与\ new_centers\ 是否相同\ ->\ stablized @}\ <\at[判断centers与newcenters是否相同stablized]>/ETEX
         for (size_t i = 0; i < centers->n; i++) {
                 agn_point_free(centers->body[i]);
         }
