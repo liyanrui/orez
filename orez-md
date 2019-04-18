@@ -75,7 +75,7 @@ if __name__=="__main__":
         x = yaml.load(f)
         f.close()
     else:
-        x = yaml.load(sys.stdin)
+        x = yaml.safe_load(sys.stdin)
     # 为代码高亮准备词法解析器的查找表
     lexers = {'c':CLexer, 'c++':CppLexer, 'python':Python3Lexer, 
               'scheme':SchemeLexer, 'lua':LuaLexer, 'tex':TexLexer, 

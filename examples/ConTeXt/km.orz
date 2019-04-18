@@ -66,7 +66,7 @@ for /BTEX$x_i$/ETEX in /BTEX$\{x_i,\dots,x_N\}$/ETEX {
 <km-init>
 static AgnTree *km_init(AgnArray *points, size_t K)
 {
-        size_t *indices = generate_indices(K, 0, points->n - 1);
+        size_t *indices = agn_generate_indices(K, 0, points->n - 1);
         # 初始化种类中心 -> init_centers @
         # 初始化种类树 -> class_tree @
         agn_array_free(init_centers);
@@ -86,7 +86,7 @@ for (size_t i = 0; i < K; i++) {
 }
 @
 
-种类中心初始化过程中所用的 \type{indices} 是 $[0, n - 1]$ 内 $K$ 个不重复的随机值，由 \type{generate_indices} 生成：
+种类中心初始化过程中所用的 \type{indices} 是 $[0, n - 1]$ 内 $K$ 个不重复的随机值，由 \type{agn_generate_indices} 生成：
 
 @ agn_km.c # <km-init> ^+
 static bool index_recurring(size_t index, size_t *indices, size_t n)
@@ -96,8 +96,7 @@ static bool index_recurring(size_t index, size_t *indices, size_t n)
         }
         return false;
 }
-
-static size_t *generate_indices(size_t K, size_t from, size_t to)
+size_t *agn_generate_indices(size_t K, size_t from, size_t to)
 {
         size_t *indices = malloc(K * sizeof(size_t));
         srand(time(NULL));
@@ -352,6 +351,7 @@ _若要提高聚类过程的计算效率，可以对 \type{calsses_stablized} �
 @
 
 @ agn_km.h # +
+size_t *agn_generate_indices(size_t K, size_t from, size_t to);
 AgnTree *agn_km_classify(AgnArray *points, size_t K);
 void agn_km_classes_free(AgnTree *class_tree);
 #endif

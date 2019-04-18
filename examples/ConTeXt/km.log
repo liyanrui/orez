@@ -1,0 +1,199 @@
+open source     > level 1, order 1, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-yes.mkiv'
+system          > 
+system          > ConTeXt  ver: 2017.08.29 19:35 MKIV beta  fmt: 2017.9.5  int: english/english
+system          > 
+system          > 'cont-new.mkiv' loaded
+open source     > level 2, order 2, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-new.mkiv'
+close source    > level 2, order 2, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-new.mkiv'
+system          > files > jobname 'km', input './km', result 'km'
+fonts           > latin modern fonts are not preloaded
+languages       > language 'en' is active
+open source     > level 2, order 3, name '/home/garfileo/public/my-project/github/orez/examples/ConTeXt/km.tex'
+open source     > level 3, order 4, name 'orez-style.tex'
+resolvers       > modules > 'zhfonts' is loaded
+open source     > level 4, order 5, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.mkiv'
+loading         > ConTeXt User Module / zhfonts
+resolvers       > lua > loading file '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.lua' succeeded
+fonts           > preloading latin modern fonts (third stage)
+open source     > level 5, order 6, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/empty-files/type-loc.mkiv'
+close source    > level 5, order 6, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/empty-files/type-loc.mkiv'
+fonts           > 'fallback modern-designsize rm 11pt' is loaded
+close source    > level 4, order 6, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.mkiv'
+resolvers       > modules > 'pretty-c' is loaded
+open source     > level 4, order 7, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.mkiv'
+resolvers       > lua > loading file '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.lua' succeeded
+open source     > level 5, order 8, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/colo-imp-ema.mkiv'
+close source    > level 5, order 8, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/colo-imp-ema.mkiv'
+colors          > system 'ema' is loaded
+close source    > level 4, order 8, name '/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.mkiv'
+resolvers       > modules > 'oldbibtex' is loaded
+open source     > level 4, order 9, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/m-oldbibtex.mkiv'
+open source     > level 5, order 10, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.mkiv'
+loading         > ConTeXt Bibliography Support / Experimental BibTeX
+resolvers       > lua > loading file '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.lua' succeeded
+publications    > loading formatting style from 'bxml-apa'
+open source     > level 6, order 11, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bxml-apa.mkiv'
+close source    > level 6, order 11, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bxml-apa.mkiv'
+close source    > level 5, order 11, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.mkiv'
+open source     > level 5, order 12, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.mkiv'
+loading         > ConTeXt Bibliography Support / BibTeX
+resolvers       > lua > loading file '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.lua' succeeded
+publications    > loading formatting style from 'bibl-apa'
+open source     > level 6, order 13, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/bib/mkii/bibl-apa.tex'
+close source    > level 6, order 13, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/bib/mkii/bibl-apa.tex'
+close source    > level 5, order 13, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.mkiv'
+close source    > level 4, order 13, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/m-oldbibtex.mkiv'
+publications    > file 'bibl-lyr' not found, unknown style ignored
+resolvers       > modules > 'asciimath' is loaded
+open source     > level 4, order 14, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.mkiv'
+resolvers       > lua > loading file '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.lua' succeeded
+resolvers       > modules > 'mathml-basics' is loaded
+interface       > macros > processed mkvi file '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv', delta 0
+interface       > macros > processed mkvi file '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv', delta 0
+open source     > level 5, order 15, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv'
+close source    > level 5, order 15, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv'
+asciimath       > beware, this is an experimental (m4all only) module
+close source    > level 4, order 15, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.mkiv'
+close source    > level 3, order 15, name 'orez-style.tex'
+open source     > level 3, order 16, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-xits.mkiv'
+open source     > level 4, order 17, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-texgyre.mkiv'
+close source    > level 4, order 17, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-texgyre.mkiv'
+close source    > level 3, order 17, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-xits.mkiv'
+structure       > sectioning > title @ level 2 : 0.0 -> $k$ 均值聚类
+floatblocks     > '1' placed
+structure       > sectioning > section @ level 3 : 0.0.1 -> 算法
+backend         > xmp > using file '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/lpdf-pdx.xml'
+pages           > flushing realpage 1, userpage 1, subpage 1
+structure       > sectioning > section @ level 3 : 0.0.2 -> 初始化
+pages           > flushing realpage 2, userpage 2
+pages           > flushing realpage 3, userpage 3
+structure       > sectioning > section @ level 3 : 0.0.3 -> 聚类
+pages           > flushing realpage 4, userpage 4
+pages           > flushing realpage 5, userpage 5
+structure       > sectioning > section @ level 3 : 0.0.4 -> 测试
+pages           > flushing realpage 6, userpage 6
+pages           > flushing realpage 7, userpage 7
+floatblocks     > '2' placed
+structure       > sectioning > section @ level 3 : 0.0.5 -> 讨论
+floatblocks     > 1 saved
+pages           > flushing realpage 8, userpage 8
+floatblocks     > 1 moved
+floatblocks     > '3' moved
+floatblocks     > '4' placed
+pages           > flushing realpage 9, userpage 9
+structure       > sectioning > section @ level 3 : 0.0.6 -> 附录
+pages           > flushing realpage 10, userpage 10
+pages           > flushing realpage 11, userpage 11
+structure       > sectioning > section @ level 3 : 0.0.7 -> 后记
+pages           > flushing realpage 12, userpage 12
+pages           > flushing realpage 13, userpage 13
+close source    > level 2, order 17, name '/home/garfileo/public/my-project/github/orez/examples/ConTeXt/km.tex'
+close source    > level 1, order 17, name '/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-yes.mkiv'
+
+system          > structure > start used structure
+
+used structure  > text: km
+used structure  >   environment: env-plain
+
+system          > structure > stop used structure
+
+
+system          > files > start used files
+
+used file       >    1: filename=char-prv.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/char-prv.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/char-prv.lua usedmethod=database
+used file       >    2: filename=cont-yes.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-yes.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-yes.mkiv usedmethod=database
+used file       >    3: filename=publ-imp-default.lua filetype=lua foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/publ-imp-default.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/publ-imp-default.lua usedmethod=database
+used file       >    4: filename=cont-new.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-new.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/cont-new.mkiv usedmethod=database
+used file       >    5: filename=lang-exc.lua filetype=lua foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/lang-exc.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/lang-exc.lua usedmethod=database
+used file       >    6: filename=lang-us.lua filetype=lua foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/patterns/mkiv/lang-us.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/patterns/mkiv/lang-us.lua usedmethod=database
+used file       >    7: filename=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/km foundname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/km.tex fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/km.tex usedmethod=qualified
+used file       >    8: filename=orez-style.tex foundname=orez-style.tex fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/orez-style.tex usedmethod=direct
+used file       >    9: filename=t-zhfonts.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.mkiv fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.mkiv usedmethod=database
+used file       >   10: filename=t-zhfonts.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.lua fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhfonts.lua usedmethod=database
+used file       >   11: filename=t-zhspuncs.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhspuncs.lua fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/zhfonts/t-zhspuncs.lua usedmethod=database
+used file       >   12: filename=type-loc.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/empty-files/type-loc.mkiv fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/empty-files/type-loc.mkiv usedmethod=database
+used file       >   13: filename=lm.lfg filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/lm.lfg fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/lm.lfg usedmethod=database
+used file       >   14: filename=lmroman10-regular filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmroman10-regular.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmroman10-regular.otf usedmethod=database
+used file       >   15: filename=latinmodern-math.otf filetype=opentypefonts foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm-math/latinmodern-math.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm-math/latinmodern-math.otf usedmethod=database
+used file       >   16: filename=t-pretty-c.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.mkiv fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.mkiv usedmethod=database
+used file       >   17: filename=t-pretty-c.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.lua fullname=/home/garfileo/opt/context/tex/texmf-local/tex/context/third/pretty-c/t-pretty-c.lua usedmethod=database
+used file       >   18: filename=colo-imp-ema.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/colo-imp-ema.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/colo-imp-ema.mkiv usedmethod=database
+used file       >   19: filename=m-oldbibtex.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/m-oldbibtex.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/m-oldbibtex.mkiv usedmethod=database
+used file       >   20: filename=bibl-bib.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.mkiv usedmethod=database
+used file       >   21: filename=bibl-bib.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-bib.lua usedmethod=database
+used file       >   22: filename=bxml-apa.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bxml-apa.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bxml-apa.mkiv usedmethod=database
+used file       >   23: filename=bibl-tra.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.mkiv usedmethod=database
+used file       >   24: filename=bibl-tra.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/bibl-tra.lua usedmethod=database
+used file       >   25: filename=bibl-apa.tex filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/bib/mkii/bibl-apa.tex fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/bib/mkii/bibl-apa.tex usedmethod=database
+used file       >   26: filename=x-asciimath.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.mkiv usedmethod=database
+used file       >   27: filename=x-asciimath.lua filetype=tex format=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.lua fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-asciimath.lua usedmethod=database
+used file       >   28: filename=x-mathml-basics.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/modules/mkiv/x-mathml-basics.mkiv usedmethod=database
+used file       >   29: filename=type-imp-xits.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-xits.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-xits.mkiv usedmethod=database
+used file       >   30: filename=type-imp-texgyre.mkiv filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-texgyre.mkiv fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/type-imp-texgyre.mkiv usedmethod=database
+used file       >   31: filename=xits-math.lfg filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/xits-math.lfg fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/fonts/mkiv/xits-math.lfg usedmethod=database
+used file       >   32: filename=texgyrepagella-regular.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf usedmethod=database
+used file       >   33: filename=simsun.ttc filetype=ttc format=ttc foundname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simsun.ttc fullname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simsun.ttc usedmethod=otherwise
+used file       >   34: filename=xits-math.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/xits/xits-math.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/xits/xits-math.otf usedmethod=database
+used file       >   35: filename=xits-mathbold.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/xits/xits-mathbold.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/xits/xits-mathbold.otf usedmethod=database
+used file       >   36: filename=texgyrepagella-bold.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-bold.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-bold.otf usedmethod=database
+used file       >   37: filename=simhei.ttf filetype=ttf format=ttf foundname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simhei.ttf fullname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simhei.ttf usedmethod=database
+used file       >   38: filename=images/dragon-km-output.png format=tex foundname=images/dragon-km-output.png fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/images/dragon-km-output.png usedmethod=direct
+used file       >   39: filename=lpdf-pdx.xml filetype=tex foundname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/lpdf-pdx.xml fullname=/home/garfileo/opt/context/tex/texmf-context/tex/context/base/mkiv/lpdf-pdx.xml usedmethod=database
+used file       >   40: filename=lmmono10-regular.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmmono10-regular.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmmono10-regular.otf usedmethod=database
+used file       >   41: filename=simkai filetype=ttf format=ttf foundname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simkai.ttf fullname=/home/garfileo/opt/context/tex/texmf-local/fonts/truetype/non-free/simkai.ttf usedmethod=database
+used file       >   42: filename=lmmonolt10-bold.otf filetype=otf format=otf foundname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmmonolt10-bold.otf fullname=/home/garfileo/opt/context/tex/texmf/fonts/opentype/public/lm/lmmonolt10-bold.otf usedmethod=database
+used file       >   43: filename=images/fish-5-classes-output.png format=tex foundname=images/fish-5-classes-output.png fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/images/fish-5-classes-output.png usedmethod=direct
+used file       >   44: filename=images/km-output.png format=tex foundname=images/km-output.png fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/images/km-output.png usedmethod=direct
+used file       >   45: filename=images/km-bad-output.png format=tex foundname=images/km-bad-output.png fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/images/km-bad-output.png usedmethod=direct
+used file       >   46: filename=images/incorrect-clusters.pdf format=tex foundname=images/incorrect-clusters.pdf fullname=/home/garfileo/public/my-project/github/orez/examples/ConTeXt/images/incorrect-clusters.pdf usedmethod=direct
+
+system          > files > stop used files
+
+
+system          > options > start commandline options
+
+used option     > currentrun="4"
+used option     > fulljobname="./km"
+used option     > input="./km"
+used option     > kindofrun="2"
+used option     > maxnofruns="9"
+used option     > no-parse-first-line="true"
+
+system          > options > stop commandline options
+
+system          > options > start commandline files
+
+used file       >    1: ./km
+
+system          > options > stop commandline files
+
+
+mkiv lua stats  > used config file: selfautoparent:/texmf/web2c/texmfcnf.lua
+mkiv lua stats  > used cache path: /home/garfileo/opt/context/tex/texmf-cache/luatex-cache/context/5fe67e0bfe781ce0dde776fb1556f32e
+mkiv lua stats  > resource resolver: loadtime 0.009 seconds, 0 scans with scantime 0.000 seconds, 0 shared scans, 46 found files, scanned paths: <none>
+mkiv lua stats  > stored bytecode data: 405 modules (0.360 sec), 91 tables (0.020 sec), 496 chunks (0.381 sec)
+mkiv lua stats  > traced context: maxstack: 1252, freed: 2, unreachable: 1250
+mkiv lua stats  > cleaned up reserved nodes: 92 nodes, 9 lists of 450
+mkiv lua stats  > node memory usage: 3 glue, 2 kern, 2 penalty, 20 attribute, 49 glue_spec, 5 attribute_list, 2 temp, 2 user_defined
+mkiv lua stats  > node list callback tasks: 7 unique task lists, 8 instances (re)created, 2429 calls
+mkiv lua stats  > h-node processing time: 0.018 seconds including kernel
+mkiv lua stats  > attribute processing time: 0.017 seconds front- and backend
+mkiv lua stats  > used backend: pdf (backend for directly generating pdf output)
+mkiv lua stats  > jobdata time: 0.004 seconds saving, 0.002 seconds loading
+mkiv lua stats  > callbacks: 5249 direct, 5877 indirect, 11126 total
+mkiv lua stats  > randomizer: resumed with value 0.83544324796435
+mkiv lua stats  > v-node processing time: 0.011 seconds 
+mkiv lua stats  > loaded tex modules: 5 requested, all found (*-asciimath *-mathml-basics *-oldbibtex *-pretty-c *-zhfonts)
+mkiv lua stats  > loaded patterns: en::2, load time: 0.000
+mkiv lua stats  > interactive elements: 27 references, 35 destinations
+mkiv lua stats  > result saved in file: km.pdf, compresslevel 3, objectcompresslevel 3
+mkiv lua stats  > loaded fonts: 11 files: simhei.ttf, simkai.ttf, simsun.ttc, latinmodern-math.otf, lmmono10-regular.otf, lmmonolt10-bold.otf, lmroman10-regular.otf, texgyrepagella-bold.otf, texgyrepagella-regular.otf, xits-math.otf, xits-mathbold.otf
+mkiv lua stats  > font engine: otf 3.102, afm 1.512, tfm 1.000, 41 instances, 24 shared in backend, 0 common vectors, 24 common hashes, load time 2.811 seconds 
+mkiv lua stats  > graphics processing time: 0.009 seconds including tex, 5 processed images, 5 unique asked, 0 bad names
+mkiv lua stats  > pdf annotations: 27 links (27 unique), 0 special
+mkiv lua stats  > used platform: linux-64, type: unix, binary subtree: texmf-linux-64
+mkiv lua stats  > used engine: luatex version 1.05 with functionality level 6357, banner: this is luatex, version 1.05.0 (tex live 2017)
+mkiv lua stats  > control sequences: 50666 of 65536 + 100000
+mkiv lua stats  > lua properties: engine: lua, used memory: 335 MB (ctx: 336 MB), hash type: lua, hash chars: min(64,40), symbol mask: utf (τεχ)
+mkiv lua stats  > runtime: 4.315 seconds, 13 processed pages, 13 shipped pages, 3.013 pages/second
+
