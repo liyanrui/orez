@@ -37,10 +37,10 @@ if __name__=="__main__":
     x = None
     if len(sys.argv) > 1:
         f = open(sys.argv[1])
-        x = yaml.load(f)
+        x = yaml.full_load(f)
         f.close()
     else:
-        x = yaml.load(sys.stdin)
+        x = yaml.safe_load(sys.stdin)
     for e in x:
         if 'DOC_FRAG' in e:
             orez_output(e['DOC_FRAG'].strip("'"))

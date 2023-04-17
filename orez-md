@@ -72,7 +72,7 @@ if __name__=="__main__":
     x = None
     if len(sys.argv) > 1:
         f = open(sys.argv[1])
-        x = yaml.load(f)
+        x = yaml.full_load(f)
         f.close()
     else:
         x = yaml.safe_load(sys.stdin)
