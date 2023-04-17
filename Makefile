@@ -2,7 +2,7 @@ prefix=/usr/local
 CC=gcc
 GLIB_FLAGS=-std=c11 -Werror -O2 $(shell pkg-config --cflags --libs glib-2.0)
 orez: main.c
-	$(CC) $(GLIB_FLAGS) $< -o $@
+	$(CC) $< -o $@ $(GLIB_FLAGS)
 
 .PHONY: install uninstall clean
 install:
