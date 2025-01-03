@@ -15,13 +15,6 @@ from pygments.lexers import TextLexer
 from pygments.lexers import EmacsLispLexer
 from pygments.formatters import HtmlFormatter
 
-def make_alnum_text(text):
-    alnum_text = ''
-    for c in text:
-        if c.isalnum():
-            alnum_text += c
-    return alnum_text
-
 def orez_output(text):
     sys.stdout.write(text)
 
@@ -51,21 +44,20 @@ def orez_code_highlight(code, lexer):
     hl_code = leading_spaces + hl_code + trailing_spaces
     return hl_code
 
-def lang_mark_warn(code_frag, info):
-    sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
+def lang_mark_warn(snippet, info):
+    sys.stderr.write("@ {0} # : ".format(snippet["name"].strip("'")))
     sys.stderr.write(info)
     sys.stderr.write('\n')
 
-def format_code_frag_ref(ref):
-    name = ref['NAME'].strip("'")
-    name_alnum = make_alnum_text(name)
-    if 'ID_ARRAY' in ref:
+def format_snippet_reference(ref):
+    name = ref["name"].strip("'")
+    hash = ref["hash"]
+    if "ids" in ref:
         orez_output('<span class="orez-callee-text"># %s @</span>' % name)
-        for id in ref['ID_ARRAY']: # 尾随一组 \at 生成的页码
-            orez_output(' <a href="#%s%d">[%d]</a>' % (name_alnum, id, id))
-    else:  # 源码域名后面是一个 \at 生成的页码
-        orez_output('<a href="#%s" class="orez-callee-link"># %s @</a>' 
-                    % (name_alnum, name))
+        for id in ref["ids"]:
+            orez_output(' <a href="#%s%d">[%d]</a>' % (hash, id, id))
+    else:
+        orez_output('<a href="#%s" class="orez-callee-link"># %s @</a>' % (hash, name))
 
 if __name__=="__main__":
     # 解析 yaml
@@ -77,91 +69,81 @@ if __name__=="__main__":
     else:
         x = yaml.safe_load(sys.stdin)
     # 为代码高亮准备词法解析器的查找表
-    lexers = {'c':CLexer, 'c++':CppLexer, 'python':Python3Lexer, 
-              'scheme':SchemeLexer, 'lua':LuaLexer, 'tex':TexLexer, 
-              'makefile':MakefileLexer, 'gnuplot':GnuplotLexer,
-              'plain':TextLexer, 'elisp':EmacsLispLexer, 'bash':BashLexer}
-
+    lexers = {"c":CLexer, "c++":CppLexer, "python":Python3Lexer, 
+              "scheme":SchemeLexer, "lua":LuaLexer, "tex":TexLexer, 
+              "makefile":MakefileLexer, "gnuplot":GnuplotLexer,
+              "plain":TextLexer, "elisp":EmacsLispLexer, "bash":BashLexer}
     for e in x:
-        if 'DOC_FRAG' in e:
-            orez_output(e['DOC_FRAG'].strip("'"))
-            orez_output("\n\n")
+        if e["type"] == "snippet":
+            content = e["content"].strip("'")
+            if len(content) > 0:
+                orez_output(content)
+                orez_output("\n\n")
         else:
-            cf = e['CODE_FRAG']
-            name = cf['NAME'].strip("'")
-            name_alnum = make_alnum_text(name)
-            
+            name = e["name"].strip("'") # 多行字串解析结果会保留包裹字符串的单引号
+            hash = e["hash"] # 当行字符串解析结果不会出现包裹字符串的单引号……反正挺奇怪的。
             # pre begin
-            if 'ID' in cf:
-                orez_output('<pre id="%s%d" class="orez-code-fragment">\n'
-                            % (name_alnum, cf['ID']))
+            if "id" in e:
+                orez_output('<pre id="%s%d" class="orez-snippet-with-name">\n' % (hash, e["id"]))
             else:
-                orez_output('<pre id="%s" class="orez-code-fragment">\n' % (name_alnum))
-            
+                orez_output('<pre id="%s" class="orez-snippet-with-name">\n' % (hash))
             # format code fragment name
-            orez_output('<span class="orez-code-fragment-name">@ ')
+            orez_output('<span class="orez-snippet-name">@ ')
             orez_output(name)
             orez_output(' #</span>')
-            
-            # format target label and operator
-            if 'OPERATOR' in cf:
-                if 'LABEL_REF' in cf:
-                    label_ref = cf['LABEL_REF'].strip("'")
-                    long_label_ref = name_alnum + '-' + make_alnum_text(label_ref)
-                    orez_output('  <a class="orez-label-ref" ')
-                    orez_output('href="#{0}">&lt;{1}&gt;</a>'.format(long_label_ref, label_ref))
-                orez_output('  <span class="orez-symbol">{0}</span>'.format(cf['OPERATOR']))
-            
-            # format source label
-            if 'LABEL' in cf:
-                label = cf['LABEL'].strip("'")
-                long_label = name_alnum + '-' + make_alnum_text(label)
+            # tag reference and operator
+            if "operator" in e:
+                if "tag_reference" in e:
+                    tag_ref = e["tag_reference"]
+                    tag_ref_name = tag_ref["name"].strip("'")
+                    tag_ref_hash = hash + "-" + tag_ref["hash"]
+                    orez_output('  <a class="orez-tag-reference" ')
+                    orez_output('href="#{0}">&lt;{1}&gt;</a>'.format(tag_ref_hash, 
+                                                                     tag_ref_name))
+                orez_output('  <span class="orez-symbol">{0}</span>'.format(e["operator"]))
+            # tag
+            if "tag" in e:
+                tag = e["tag"]
+                tag_hash = hash + '-' + tag["hash"]
                 orez_output('\n<span id="%s" class="orez-label">&lt;%s&gt;</span>'
-                            % (long_label, label))
-            orez_output("\n")
-            
-            # format code fragment body
-            for o_e in cf['CONTENT']:
-                if 'SNIPPET' in o_e:
-                    lang = 'plain'
-                    snippet = o_e['SNIPPET'].strip("'")
-                    if 'LANG' in cf:
-                        lang = cf['LANG'].lower()
+                            % (tag_hash, tag["name"].strip("'")))
+            # snippet content
+            for p in e["content"]:
+                if "text" in p:
+                    lang = "plain"
+                    text = p["text"].strip("'")
+                    if "language" in e:
+                        lang = e["language"].lower()
                         if lang not in lexers:
-                            lang_mark_warn(cf, "There is not lexer for me!")
+                            lang_mark_warn(e, "There is not lexer for me!")
                             lang = 'plain'
                     else:
                         lang_mark_warn(cf, "No language mark for me!")
                     lexer = lexers[lang]
-                    hl_code = orez_code_highlight(snippet, lexer)
+                    hl_code = orez_code_highlight(text, lexer)
                     orez_output(hl_code)
-                elif 'INDENT' in o_e:
-                    orez_output(o_e['INDENT'])
-                elif 'REF' in o_e:
-                    format_code_frag_ref(o_e['REF'])
-                    orez_output('\n')
                 else:
-                    illegal_code_frag_warning(cf)
+                    format_snippet_reference(p["reference"])
+                    orez_output('\n')
             
             # if last element is a piece of code snippet, 
             # a linebreak should be append
-            if 'SNIPPET' in cf['CONTENT'][-1]:
+            if "text" in e["content"][-1]:
                 orez_output('\n')
-            
-            # format emissions 
-            if 'EMISSIONS' in cf:
-                for o_e in cf['EMISSIONS']:
-                    emi = o_e['EMISSION']
+            # emissions 
+            if "emissions" in e:
+                for p in e["emissions"]:
+                    emi = p["emission"]
                     # 由于要为 emi_name 增加了 '=> ' 前缀，若 emisi_name 为多行文本，为了美观，
                     # 那么每个换行符后需要增加三个空白字符作为 padding
-                    emi_name = emi['NAME'].strip("'").replace('\n', '\n   ')
-                    emi_name_alnum = make_alnum_text(emi_name)
-                    if 'ID' in emi:
+                    emi_name = emi["name"].strip("'").replace('\n', '\n   ')
+                    emi_hash = emi["hash"]
+                    if "id" in emi:
                         emi_link = '<span class="orez-symbol">=&gt;</span> ' + \
                                    '<a href="#{0}{1}" class="proc-emissions-name">{2}</a>\n'
-                        orez_output(emi_link.format(emi_name_alnum, emi['ID'], emi_name))
+                        orez_output(emi_link.format(emi_hash, emi["id"], emi_name))
                     else:
                         emi_link = '<span class="orez-symbol">=&gt;</span> ' + \
                                    '<a href="#{0}" class="proc-emissions-name">{1}</a>\n'
-                        orez_output(emi_link.format(emi_name_alnum, emi_name))
+                        orez_output(emi_link.format(emi_hash, emi_name))
             orez_output("</pre>\n\n")

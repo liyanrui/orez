@@ -1,6 +1,7 @@
 prefix=/usr/local
 CC=gcc
-GLIB_FLAGS=-std=c11 -Werror -O2 $(shell pkg-config --cflags --libs glib-2.0)
+GLIB_FLAGS=-std=c11 -Werror -O2 -lcyaml \
+             $(shell pkg-config --cflags --libs glib-2.0)
 orez: main.c
 	$(CC) $< -o $@ $(GLIB_FLAGS)
 

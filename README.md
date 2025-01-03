@@ -4,7 +4,7 @@ Orez is a literate programming tool almost without dependency on any document fo
 
 ## Installation
 
-You might install it into your system via the following command:
+To compile orez, the system needs to have libcyaml, glib libraries, and pkg-config tool pre-installed. You can compile and install it into your system via the following command:
 
 ```console
 $ git clone https://github.com/liyanrui/orez.git
@@ -112,68 +112,86 @@ $ orez -w hello-world.orz > hello-world.yml
 The content of hello-world.yml looks like this:
 
 ```YAML
-- DOC_FRAG: |-
+- type: snippet
+  content: |-
     'This is a Hello Wrold program written in C language.'
-- CODE_FRAG:
-    NAME: |-
-        'hello world'
-    ID: 1
-    LANG: C
-    LABEL: |-
-        'main-function'
-    CONTENT:
-        - SNIPPET: |-
-            'int main(void)
-            {
-            '
-        - INDENT: '        '
-        - REF:
-            NAME: |-
-                'display "Hello, World!" on screen'
-- DOC_FRAG: |-
+- type: snippet with name
+  name: |-
+    'hello world'
+  hash: 'helloworld'
+  id: 1
+  language: 'C'
+  tag: 
+    name: |-
+      'main-function'
+    hash: 'main-function'
+  content: 
+    - text: |-
+        '
+        int main(void)
+        {
+                '
+    - reference: 
+        name: |-
+          'display "Hello, World!" on screen'
+        hash: 'displayHello,World!onscreen'
+    - text: |-
+        '
+        '
+- type: snippet
+  content: |-
     'We can use the <puts> function provided by C standard
     library to display some information on screen:'
-- CODE_FRAG:
-    NAME: |-
-        'display "Hello, World!" \
-          on screen'
-    LANG: C
-    CONTENT:
-        - SNIPPET: |-
-            'puts("Hello, World!");'
-    EMISSIONS:
-        - EMISSION:
-            NAME: |-
-                'hello world'
-            ID: 1
-- DOC_FRAG: |-
+- type: snippet with name
+  name: |-
+    'display "Hello, World!" 
+      on screen'
+  hash: 'displayHello,World!onscreen'
+  language: 'C'
+  content: 
+    - text: |-
+        '
+        puts("Hello, World!");'
+  emissions: 
+    - emission: 
+        name: |-
+          'hello world'
+        hash: 'helloworld'
+        id: 1
+- type: snippet
+  content: |-
     'However, in order to convince C compiler the <puts> function
     has been defined, we need to include stdio.h:'
-- CODE_FRAG:
-    NAME: |-
-        'hello world'
-    ID: 2
-    LANG: C
-    LABEL_REF: |-
-        'main-functio n'
-    OPERATOR: ^+
-    CONTENT:
-        - SNIPPET: |-
-            '#include <stdio.h>'
-- DOC_FRAG: |-
+- type: snippet with name
+  name: |-
+    'hello world'
+  hash: 'helloworld'
+  id: 2
+  language: 'C'
+  tag_reference: 
+    name: |-
+      'main-functio n'
+    hash: 'main-function'
+  operator: '^+'
+  content: 
+    - text: |-
+        '
+        #include <stdio.h>'
+- type: snippet
+  content: |-
     'If there is not any error occurs, this program should end up returning 0:'
-- CODE_FRAG:
-    NAME: |-
-        'hello world'
-    ID: 3
-    LANG: C
-    OPERATOR: +
-    CONTENT:
-        - SNIPPET: |-
-            '        return 0;
-            }'
-- DOC_FRAG: |-
-    ''
+- type: snippet with name
+  name: |-
+    'hello world'
+  hash: 'helloworld'
+  id: 3
+  language: 'C'
+  operator: '+'
+  content: 
+    - text: |-
+        '
+                return 0;
+        }'
 ```
 
 You might write some scripts to convert the YAML docuemnt into a particular document format, such as LaTeX, HTML. I have provided two python scripts for ConTeXt MkIV and Markdown respectivily. 
@@ -190,19 +208,19 @@ The reulst is as follows:
 This is a Hello Wrold program written in C language.
 
 \startC
-/BTEX\pagereference[helloworld1]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX
-/BTEX\reference[helloworld-mainfunction]{<main-function>}\OrezReference{<main-function>}/ETEX
+/BTEX\pagereference[helloworld1]/ETEX/BTEX\SnippetName{@ hello\ world \#}/ETEX
+/BTEX\reference[helloworld-main-function]{<main-function>}\OrezReference{<main-function>}/ETEX
 int main(void)
 {
-        /BTEX\Callee{\# display\ "Hello,\ World!"\ on\ screen @}\ <\at[displayHelloWorldonscreen]>/ETEX
+        /BTEX\Callee{\# display\ "Hello,\ World!"\ on\ screen @}\ <\at[displayHello,World!onscreen]>/ETEX
+
 \stopC
 
 We can use the <puts> function provided by C standard
 library to display some information on screen:
 
 \startC
-/BTEX\pagereference[displayHelloWorldcrlfonscreen]/ETEX/BTEX\CodeFragmentName{@ display\ "Hello,\ World!"\ \crlf
-\ \ on\ screen \#}/ETEX
+/BTEX\pagereference[displayHello,World!onscreen]/ETEX/BTEX\SnippetName{@ display\ "Hello,\ World!"\ \blank[0em]\ \ on\ screen \#}/ETEX
 puts("Hello, World!");
 /BTEX\OrezSymbol{=>}/ETEX /BTEX\Emission{hello world}\ <\at[helloworld1]>/ETEX
 \stopC
@@ -211,14 +229,14 @@ However, in order to convince C compiler the <puts> function
 has been defined, we need to include stdio.h:
 
 \startC
-/BTEX\pagereference[helloworld2]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX /BTEX\in[helloworld-mainfunction]/ETEX /BTEX\OrezSymbol{$\wedge+$}/ETEX
+/BTEX\pagereference[helloworld2]/ETEX/BTEX\SnippetName{@ hello\ world \#}/ETEX /BTEX\in[helloworld-main-function]/ETEX /BTEX\OrezSymbol{$\wedge+$}/ETEX
 #include <stdio.h>
 \stopC
 
 If there is not any error occurs, this program should end up returning 0:
 
 \startC
-/BTEX\pagereference[helloworld3]/ETEX/BTEX\CodeFragmentName{@ hello\ world \#}/ETEX /BTEX\OrezSymbol{$+$}/ETEX
+/BTEX\pagereference[helloworld3]/ETEX/BTEX\SnippetName{@ hello\ world \#}/ETEX /BTEX\OrezSymbol{$+$}/ETEX
         return 0;
 }
 \stopC
@@ -235,19 +253,21 @@ The result is:
 ```markdown
 This is a Hello Wrold program written in C language.
 
-<pre id="helloworld1" class="orez-code-fragment">
-<span class="orez-code-fragment-name">@ hello world #</span>
-<span id="helloworld-mainfunction" class="orez-label">&lt;main-function&gt;</span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<pre id="helloworld1" class="orez-snippet-with-name">
+<span class="orez-snippet-name">@ hello world #</span>
+<span id="helloworld-main-function" class="orez-label">&lt;main-function&gt;</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="p">{</span>
-        <a href="#displayHelloWorldonscreen" class="orez-callee-link"># display "Hello, World!" on screen @</a>
+        <a href="#displayHello,World!onscreen" class="orez-callee-link"># display "Hello, World!" on screen @</a>
+
+
 </pre>
 
 We can use the <puts> function provided by C standard
 library to display some information on screen:
 
-<pre id="displayHelloWorldonscreen" class="orez-code-fragment">
-<span class="orez-code-fragment-name">@ display "Hello, World!" \
+<pre id="displayHello,World!onscreen" class="orez-snippet-with-name">
+<span class="orez-snippet-name">@ display "Hello, World!" 
   on screen #</span>
 <span class="n">puts</span><span class="p">(</span><span class="s">&quot;Hello, World!&quot;</span><span class="p">);</span>
 <span class="orez-symbol">=&gt;</span> <a href="#helloworld1" class="proc-emissions-name">hello world</a>
@@ -256,20 +276,20 @@ library to display some information on screen:
 However, in order to convince C compiler the <puts> function
 has been defined, we need to include stdio.h:
 
-<pre id="helloworld2" class="orez-code-fragment">
-<span class="orez-code-fragment-name">@ hello world #</span>  <a class="orez-label-ref" href="#helloworld-mainfunction">&lt;main-functio n&gt;</a>  <span class="orez-symbol">^+</span>
-<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<pre id="helloworld2" class="orez-snippet-with-name">
+<span class="orez-snippet-name">@ hello world #</span>  <a class="orez-tag-reference" href="#helloworld-main-function">&lt;main-functio n&gt;</a>  <span class="orez-symbol">^+</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
 </pre>
 
 If there is not any error occurs, this program should end up returning 0:
 
-<pre id="helloworld3" class="orez-code-fragment">
-<span class="orez-code-fragment-name">@ hello world #</span>  <span class="orez-symbol">+</span>
-        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<pre id="helloworld3" class="orez-snippet-with-name">
+<span class="orez-snippet-name">@ hello world #</span>  <span class="orez-symbol">+</span>
+        <span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
 </pre>
 ```
 
-## More Details
+## More
 
-Please see https://github.com/liyanrui/orez/tree/master/examples
+Please see <https://liyanrui.github.io/output/2025/orez-v1.html>

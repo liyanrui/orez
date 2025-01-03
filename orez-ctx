@@ -2,36 +2,36 @@
 import sys
 import yaml
 
-def make_alnum_text(text):
-    alnum_text = ''
-    for c in text:
-        if c.isalnum():
-            alnum_text += c
-    return alnum_text
-
 def orez_output(text):
     sys.stdout.write(text)
 
-def format_code_frag_ref(ref):
-    name = ref['NAME'].strip("'").replace('\\', '\\blank[0em]').replace(' ', '\\ ')
-    name_alnum = make_alnum_text(name)
-    if 'ID_ARRAY' in ref:
-        orez_output('/BTEX\\Callee{\\# %s @}' % name)
-        for id in ref['ID_ARRAY']: # 尾随一组 \at 生成的页码
-            orez_output('\\ <\\at[%s%s]>' % (name_alnum, id))
-        orez_output('/ETEX')
-    else:  # 源码域名后面是一个 \at 生成的页码
-        orez_output('/BTEX\\Callee{\\# %s @}\\ <\\at[%s]>/ETEX' % (name, name_alnum))
+def snippet_reference_format(ref):
+    name = ref["name"].strip("'").replace("\n", "\\blank[0em]").replace(' ', '\\ ')
+    hash = ref["hash"]
+    if "ids" in ref:
+        orez_output("/BTEX\\Callee{\\# %s @}" % name)
+        for id in ref["ids"]: # 尾随夷祖 \at 生成的页码
+            orez_output("\\ <\\at[%s%s]>" % (hash, id))
+        orez_output("/ETEX")
+    else:
+        orez_output('/BTEX\\Callee{\\# %s @}\\ <\\at[%s]>/ETEX' % (name, hash))
 
-def lang_mark_warn(code_frag, info):
-    sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
-    sys.stderr.write(info)
-    sys.stderr.write('\n')
+def emissions_format(emissions):
+    for a in emissions:
+        e = a["emission"]
+        # 要为 e_name 增加 '=> ' 前缀，若 e_name 为多行文本，为了美观，
+        # 那么每个换行符后需要增加三个空白字符作为 padding
+        e_name = e["name"].strip("'").replace("\n", "\n   ")
+        e_hash = e["hash"]
+        orez_output("\n/BTEX\\OrezSymbol{=>}/ETEX /BTEX")
+        if "id" in e:
+            orez_output("\\Emission{%s}\\ <\\at[%s%d]>" \
+                        % (e_name, e_hash, e["id"]))
+        else:
+            orez_output("\\Emission{%s}\\ <\\at[%s]>" \
+                        % (e_name, e_hash))
+        orez_output("/ETEX")
 
-def illegal_code_frag_warning(code_frag):
-    sys.stderr.write("@ {0} # : ".format(code_frag['NAME'].strip("'")))
-    sys.stderr.write("Illegal!\n")
-    
 if __name__=="__main__":
     # 解析 yaml
     x = None
@@ -42,85 +42,46 @@ if __name__=="__main__":
     else:
         x = yaml.safe_load(sys.stdin)
     for e in x:
-        if 'DOC_FRAG' in e:
-            orez_output(e['DOC_FRAG'].strip("'"))
-            orez_output("\n\n")
+        if e["type"] == "snippet":
+            content = e["content"].strip("'")
+            if len(content) > 0:
+                orez_output(content)
+                orez_output("\n\n")
         else:
-            cf = e['CODE_FRAG']
-            if 'LANG' in cf:
-                lang = cf['LANG'].upper()
-                orez_output('\\start{0}\n'.format(lang))
+            # 代码块开始
+            language = e["language"].upper();
+            orez_output("\\start{0}\n".format(language))
+            # 代码块名
+            name = e["name"].strip("'").replace("\n", "\\blank[0em]").replace(' ', '\\ ')
+            hash = e["hash"]
+            if 'id' in e:
+                orez_output("/BTEX\\pagereference"
+                            "[{0}{1}]/ETEX".format(hash, e["id"]))
             else:
-                no_lang_mark_warning(cf)
-                lang_mark_warn(cf, "No language mark for me!")
-                orez_output('\\starttyping\n')
-            
-            # 格式化代码段名称
-            name = cf['NAME'].strip("'").replace('\\', '\\blank[0em]')
-            name_alnum = make_alnum_text(name)
-            if 'ID' in cf:
-                orez_output('/BTEX\\pagereference'
-                            '[{0}{1}]/ETEX'.format(name_alnum, cf['ID']))
-            else:
-                orez_output('/BTEX\\pagereference[{0}]/ETEX'.format(name_alnum))
-            orez_output('/BTEX\\CodeFragmentName{@ %s \\#}/ETEX' \
-                        % name.replace(' ', '\\ '))
-            
-            # 格式化运算符域
-            if 'OPERATOR' in cf:
-                if 'LABEL_REF' in cf:
-                    label_ref = cf['LABEL_REF'].strip("'")
-                    long_label_ref = name_alnum + '-' + make_alnum_text(label_ref)
-                    orez_output(' /BTEX\\in[{0}]/ETEX'.format(long_label_ref))
-                orez_output(' /BTEX\\OrezSymbol{$%s$}/ETEX'
-                            % cf['OPERATOR'].replace('^', '\\wedge'))
-            
-            # 格式化源标签，与运算符域的格式化代码有必须的耦合
-            if 'LABEL' in cf:
-                label = cf['LABEL'].strip("'")
-                long_label = name_alnum + '-' + make_alnum_text(label)
-                orez_output('\n/BTEX\\reference[%s]{<%s>}\\OrezReference{<%s>}/ETEX' \
-                            % (long_label, label, label))
-            
-            # 代码片段头部与体之间应该有个换行
-            orez_output("\n")
-            
-            # 格式化代码片段及代码片段的引用语句
-            for o_e in cf['CONTENT']:
-                if 'SNIPPET' in o_e:
-                    orez_output(o_e['SNIPPET'].strip("'"))
-                elif 'INDENT' in o_e:
-                    orez_output(o_e['INDENT'])
-                elif 'REF' in o_e:
-                    format_code_frag_ref(o_e['REF'])
-                    orez_output('\n')
+                orez_output("/BTEX\\pagereference[{0}]/ETEX".format(hash))
+            orez_output("/BTEX\\SnippetName{@ %s \\#}/ETEX" % name)
+            # 标签引用和运算符
+            if "operator" in e:
+                if "tag_reference" in e:
+                    tag_ref = e["tag_reference"]
+                    tag_ref_hash = hash + "-" + tag_ref["hash"]
+                    orez_output(" /BTEX\\in[{0}]/ETEX".format(tag_ref_hash))
+                orez_output(" /BTEX\\OrezSymbol{$%s$}/ETEX" % e["operator"].replace("^", "\\wedge"))
+            # 标签：与上面的标签引用在 ConTeXt 层面有强耦合
+            if "tag" in e:
+                tag = e["tag"]
+                tag_name = tag["name"].strip("'")
+                tag_hash = hash + "-" + tag["hash"]
+                orez_output("\n/BTEX\\reference[%s]{<%s>}\\OrezReference{<%s>}/ETEX" \
+                            % (tag_hash, tag_name, tag_name))
+            # 有名片段内容
+            for p in e["content"]:
+                if "text" in p:
+                        orez_output(p["text"].strip("'"))
                 else:
-                    illegal_code_frag_warning(cf)
-            
-            # if last element is a piece of code snippet, 
-            # a linebreak should be append
-            if 'SNIPPET' in cf['CONTENT'][-1]:
-                orez_output('\n')
-            
-            # 格式化出射域
-            if 'EMISSIONS' in cf:
-                for o_e in cf['EMISSIONS']:
-                    emi = o_e['EMISSION']
-                    # 由于要为 emi_name 增加了 '=> ' 前缀，若 emisi_name 为多行文本，为了美观，
-                    # 那么每个换行符后需要增加三个空白字符作为 padding
-                    emi_name = emi['NAME'].strip("'").replace('\n', '\n   ')
-                    emi_name_alnum = make_alnum_text(emi_name)
-                    orez_output('/BTEX\\OrezSymbol{=>}/ETEX /BTEX')
-                    if 'ID' in emi:
-                        orez_output('\\Emission{%s}\\ <\\at[%s%d]>'
-                                    % (emi_name,  emi_name_alnum, emi['ID']))
-                    else:
-                        orez_output('\\Emission{%s}\\ <\\at[%s]>' 
-                                    % (emi_name,  emi_name_alnum))
-                    orez_output('/ETEX\n')
-            if 'LANG' in cf:
-                lang = cf['LANG'].upper()
-                orez_output('\\stop{0}\n'.format(lang))
-            else:
-                orez_output('\\stoptyping\n')
-            orez_output('\n')
+                    snippet_reference_format(p["reference"])
+            # 出射域
+            if "emissions" in e:
+                emissions_format(e["emissions"])
+            # 收尾
+            orez_output("\n\\stop{0}\n\n".format(language))
