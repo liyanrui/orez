@@ -61,8 +61,8 @@ static bool am_i_here(char *a, char *b, char **cursor, char *me, int dir)
         size_t n = strlen(me);
         char *p = *cursor;
         /* 若 cursor 超范围，无需匹配 */
-        if (dir < 0 && p - a < n - 1) return false;
-        if (dir >= 0 && b - p < n - 1) return false;
+        if (dir < 0 && p < a + n - 1) return false;
+        if (dir >= 0 && p > b - n + 1) return false;
         /* 否则 */
         bool result = false;
         char *t = malloc((n + 1) * sizeof(char));
@@ -381,7 +381,7 @@ static GString *extract_operator(OrezToken *t, GString *operator)
                                 if (*p == ' '
                                     || *p == '\t'
                                     || *p == '\n'
-                                    || am_i_here(a, b, &p, "　", -1)) ;
+                                    || am_i_here(a, b - 1, &p, "　", -1)) ;
                                 else state = FAILURE;
                                 break;
                         default:
@@ -1585,30 +1585,20 @@ static GString *orez_string_chug(GString *text, GPtrArray *useless_characters)
 {
         if (text->len == 0) return text;
         GString *new_text = g_string_new(NULL);
-        char *p = text->str;
+        /* 构造字符串闭区间 [a, b] */
+        char *a = text->str, *b = text->str + text->len - 1;
+        char *p = a;
         while (1) {
                 char *t = p;
                 if (*p == '\0') break;
                 for (size_t i = 0; i < useless_characters->len; i++) {
                         GString *c = g_ptr_array_index(useless_characters, i);
                         char *q = p;
-                        char *r = c->str;
-                        bool hit = TRUE;
-                        for (size_t j = 0; j < c->len; j++) {
-                                if (*q != *r) {
-                                        hit = FALSE;
-                                        break;
-                                }
-                                q++;
-                                r++;
-                        }
-                        if (hit) p = q;
+                        if (am_i_here(p, b, &q, c->str, 1)) p = q + 1;
                 }
                 if (t == p) break;
         }
-        for ( ; *p != '\0'; p++) {
-                g_string_append_c(new_text, *p);
-        }
+        for ( ; *p != '\0'; p++) g_string_append_c(new_text, *p);
         g_string_free(text, TRUE);
         return new_text;
 }
@@ -1617,24 +1607,16 @@ static GString *orez_string_chomp(GString *text, GPtrArray *useless_characters)
 {
         if (text->len == 0) return text;
         GString *new_text = g_string_new(NULL);
-        char *p = text->str + text->len - 1;
+        /* 构造字符串闭区间 [a, b] */
+        char *a = text->str, *b = text->str + text->len - 1;
+        char *p = b;
         while (1) {
                 if (p == text->str) break;
                 char *t = p;
                 for (size_t i = 0; i < useless_characters->len; i++) {
                         GString *c = g_ptr_array_index(useless_characters, i);
                         char *q = p;
-                        char *r = c->str + c->len - 1;
-                        bool hit = TRUE;
-                        for (size_t j = 0; j < c->len; j++) {
-                                if (*q != *r) {
-                                        hit = FALSE;
-                                        break;
-                                }
-                                q--;
-                                r--;
-                        }
-                        if (hit) p = q;
+                        if (am_i_here(a, p, &q, c->str, -1)) p = q - 1;
                 }
                 if (t == p) break;
         }
