@@ -78,7 +78,10 @@ if __name__=="__main__":
             content = e["content"].strip("'")
             if len(content) > 0:
                 orez_output(content)
-                orez_output("\n\n")
+                if e == x[-1]:
+                    orez_output("\n")
+                else:
+                    orez_output("\n\n")
         else:
             name = e["name"].strip("'") # 多行字串解析结果会保留包裹字符串的单引号
             hash = e["hash"] # 当行字符串解析结果不会出现包裹字符串的单引号……反正挺奇怪的。
@@ -146,4 +149,7 @@ if __name__=="__main__":
                         emi_link = '<span class="orez-symbol">=&gt;</span> ' + \
                                    '<a href="#{0}" class="proc-emissions-name">{1}</a>\n'
                         orez_output(emi_link.format(emi_hash, emi_name))
-            orez_output("</pre>\n\n")
+            if e == x[-1]:
+                orez_output("</pre>\n")
+            else:
+                orez_output("</pre>\n\n")

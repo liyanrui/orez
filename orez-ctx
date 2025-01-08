@@ -46,7 +46,10 @@ if __name__=="__main__":
             content = e["content"].strip("'")
             if len(content) > 0:
                 orez_output(content)
-                orez_output("\n\n")
+                if e == x[-1]:
+                    orez_output("\n")
+                else:
+                    orez_output("\n\n")
         else:
             # 代码块开始
             language = e["language"].upper();
@@ -84,4 +87,7 @@ if __name__=="__main__":
             if "emissions" in e:
                 emissions_format(e["emissions"])
             # 收尾
-            orez_output("\n\\stop{0}\n\n".format(language))
+            if e == x[-1]:
+                orez_output("\n\\stop{0}\n".format(language))
+            else:
+                orez_output("\n\\stop{0}\n\n".format(language))

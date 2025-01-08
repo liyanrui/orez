@@ -56,59 +56,70 @@ static int read_char_from_input(FILE *input, GString *cache)
                 return c;
         } else return EOF;
 }
-static bool has_snippet_delimiter(GString *cache, GString *snippet_delimiter)
+static bool am_i_here(char *a, char *b, char **cursor, char *me, int dir)
 {
-        const char *p = NULL;
-        /* cache 末尾不存在片段界限符 */
+        size_t n = strlen(me);
+        char *p = *cursor;
+        /* 若 cursor 超范围，无需匹配 */
+        if (dir < 0 && p - a < n - 1) return false;
+        if (dir >= 0 && b - p < n - 1) return false;
+        /* 否则 */
+        bool result = false;
+        char *t = malloc((n + 1) * sizeof(char));
+        for (size_t i = 0; i < n; i++) {
+                t[i] = (dir < 0) ? *(p + i - n + 1) : *(p + i);
+        }
+        t[n] = '\0';
+        if (strcmp(t, me) == 0) {
+                result = true;
+                *cursor = (dir < 0) ? (p - n + 1) : (p + n - 1);
+        }
+        free(t);
+        return result;
+}
+static bool tail_is_snippet_delimiter(GString *cache,
+                                      GString *snippet_delimiter)
+{
+        char *p = NULL;
+        /* 若 cache 末尾不存在片段界限符 */
         if (snippet_delimiter->len > cache->len) return false;
         p = cache->str + cache->len - snippet_delimiter->len;
         if (strcmp(p, snippet_delimiter->str) != 0) return false;
-        /* cache 末尾存在片段界限符 */
-        enum {INIT,
-                MAYBE_IDEOGRAPHIC_SPACE_1,
-                MAYBE_IDEOGRAPHIC_SPACE_2,
-                SPACE, SUCCESS, FAILURE} state = INIT;
-        if (p == cache->str) {/* 片段界限符之前无任何字符的情况 */
-                return true;
-        }
-        p--;
-        /* 逆序遍历 cache */
+        /* 否则 */
+        enum {IDLE, SPACE, SUCCESS, FAILURE} state = IDLE;
+        if (p == cache->str) return true;
+        else p--;
+        /* 构造字符串区间 [a, b] */
+        char *a = cache->str, *b = p;
+        /* 从 b 开始逆序遍历 [a, b] */
         while (1) {
                 switch (state) {
-                case INIT:
+                case IDLE:
                         if (*p == ' ') state = SPACE;
                         else if (*p == '\t') state = SPACE;
-                        else if ((unsigned char)*p == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_1;
-                        else if (*p == '\n') state = SUCCESS;
-                        else state = FAILURE;
-                        break;
-                case MAYBE_IDEOGRAPHIC_SPACE_1:
-                        if ((unsigned char)*p == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_2;
-                        else state = FAILURE;
-                        break;
-                case MAYBE_IDEOGRAPHIC_SPACE_2:
-                        if ((unsigned char)*p == 0xE3) state = SPACE;
-                        else if (*p == ' ') state = SPACE;
-                        else if (*p == '\t') state = SPACE;
+                        else if (am_i_here(a, b, &p, "　", -1)) {
+                                state = SPACE;
+                        }
                         else if (*p == '\n') state = SUCCESS;
                         else state = FAILURE;
                         break;
                 case SPACE:
                         if (*p == ' ') state = SPACE;
                         else if (*p == '\t') state = SPACE;
-                        else if ((unsigned char)*p == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_1;
+                        else if (am_i_here(a, b, &p, "　", -1)) state = SPACE;
                         else if (*p == '\n') state = SUCCESS;
                         else state = FAILURE;
                         break;
                 default:
-                        g_error("Illegal state happens in <<< %s >>>", cache->str);
+                        g_error("Illegal state in <<< %s >>>", cache->str);
                 }
-                if (p == cache->str) {
+                if (p == a) {
+                        /* 字符串逆序遍历到头，此时匹配过程既未成功，
+                           亦未失败，则特命其成功 */
                         state = SUCCESS;
-                        break;
                 }
                 if (state == FAILURE || state == SUCCESS) break;
-                p--;
+                else p--;
         }
         return (state == SUCCESS) ? true : false;
 }
@@ -213,127 +224,79 @@ static void delete_tokens(GList *tokens)
         }
         g_list_free(tokens);
 }
-static bool hit_before_needle(GString *source, char *needle, GString *target)
-{
-        assert(needle >= source->str);
-        assert((needle - source->str + 1) <= source->len);
-        assert(source->len > target->len);
-        GString *s = g_string_new(NULL);
-        char *p = needle - target->len + 1;
-        for (size_t i = 0; i < target->len; i++) {
-                g_string_append_c(s, *p);
-                p++;
-        }
-        int equal = strcmp(s->str, target->str);
-        g_string_free(s, TRUE);
-        return equal == 0 ? TRUE : FALSE;
-}
 static char *find_name_delimiter(OrezToken *t,
                                  GString *delimiter,
                                  GString *continuation)
 {
-        if (*t->content->str == '\n') return NULL;
-        /* 若 t 的内容包含名字界限符，则 a 指向片段名字界限符之首 */
-        char *a = strstr(t->content->str, delimiter->str);
-        if (!a || a == t->content->str) return NULL;
+        /* 构造字符串区间 [a, b] */
+        char *a = t->content->str;
+        if (*a == '\n') return NULL;
+        /* b 为 NULL 或指向片段名字界限符首字节 */
+        char *b = strstr(a, delimiter->str);
+        if (!b || b == a) return NULL;
         /* 检测 source 是否含有合法的片段名字界限符 */
-        char *p = a - 1;
-        enum {INIT,
-                LINEBREAK,
-                NOT_NAME_DELIMITER,  
-                MAYBE_IDEOGRAPHIC_SPACE_1,
-                MAYBE_IDEOGRAPHIC_SPACE_2} state = INIT;
-        while (1) { /* 逆序遍历 source->content->str 的子字串 */
+        char *p = --b;
+        enum {IDLE, LINEBREAK, SUCCESS, FAILURE} state = IDLE;
+        while (1) { /* 逆序遍历 [a, b] */
                 switch (state) {
-                case INIT:
+                case IDLE:
                         if (*p == '\n') state = LINEBREAK;
                         break;
                 case LINEBREAK:
-                        if (*p == ' ' || *p == '\t') state = LINEBREAK;
-                        else if ((unsigned char)*p == 0x80) {
-                                state = MAYBE_IDEOGRAPHIC_SPACE_1;
-                        } else if (hit_before_needle(t->content, p, continuation)) {
-                                p -= (continuation->len - 1);
-                                state = INIT;
-                        } else state = NOT_NAME_DELIMITER;
-                        break;
-                case MAYBE_IDEOGRAPHIC_SPACE_1:
-                        if ((unsigned char)*p == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_2;
-                        else state = NOT_NAME_DELIMITER;
-                        break;
-                case MAYBE_IDEOGRAPHIC_SPACE_2:
-                        if ((unsigned char)*p == 0xE3) state = LINEBREAK;
-                        else state = NOT_NAME_DELIMITER;
+                        if (*p == ' '
+                            || *p == '\t'
+                            || am_i_here(a, b, &p, "　", -1)) state = LINEBREAK;
+                        else if (am_i_here(a, b, &p, continuation->str, -1)) {
+                                state = IDLE;
+                        } else state = FAILURE;
                         break;
                 default:
                         g_error("Illegal state happens in line %lu.", t->line_number);
                 }
-                if (state == NOT_NAME_DELIMITER || p == t->content->str) break;
+                if (p == a) {
+                        /* 字符串逆序遍历到头，此时匹配过程既未成功，
+                           亦未失败，则特命其成功 */
+                        state = SUCCESS;
+                }
+                if (state == FAILURE || state == SUCCESS) break;
                 else p--;
         }
-        return (state == NOT_NAME_DELIMITER) ? NULL : a;
+        return (state == SUCCESS) ? b + 1 : NULL;
 }
 static GString *extract_small_block_at_head(OrezToken *t,
                                             GString *beginning_mark,
                                             GString *end_mark)
 {
         GString *result = NULL;
-        enum {
-                INIT, MAYBE_IDEOGRAPHIC_SPACE_1, MAYBE_IDEOGRAPHIC_SPACE_2,
-                MAYBE_MARK, FAILURE, SUCCESS
-        } state = INIT;
-        char *beginning = NULL;
-        char *end = NULL;
+        enum {IDLE, MAYBE_MARK, FAILURE, SUCCESS} state = IDLE;
+        char *block_beginning = NULL;
+        char *block_end = NULL;
         size_t new_line_number = t->line_number;
-        GString *s = NULL;
-        char *p = t->content->str;
-        while (1) {
-                if (*p == '\0') break;
+        /* 构造字符串区间 [a, b] */
+        char *a = t->content->str, *b = a + t->content->len - 1;
+        if (a == b) return NULL;
+        char *p = a;
+        while (1) { /* 正序遍历 [a, b] */
                 switch (state) {
-                case INIT:
-                        if (*p == ' ' || *p == '\t') {
-                                state = INIT;
+                case IDLE:
+                        if (*p == ' ' || *p == '\t'
+                            || am_i_here(a, b, &p, "　", 1)) {
+                                state = IDLE;
                         } else if (*p == '\n') {
                                 new_line_number++;
-                                state = INIT;
-                        } else if ((unsigned char)*p == 0xE3) {
-                                state = MAYBE_IDEOGRAPHIC_SPACE_1;
-                        } else {
-                                s = g_string_new(NULL);
-                                for (size_t i = 0; i < beginning_mark->len; i++) {
-                                        g_string_append_c(s, *(p + i));
-                                }
-                                if (strcmp(s->str, beginning_mark->str) == 0) {
-                                        beginning = p;
-                                        state = MAYBE_MARK;
-                                } else state = FAILURE;
-                                g_string_free(s, TRUE);
-                        }
-                        break;
-                case MAYBE_IDEOGRAPHIC_SPACE_1:
-                        if ((unsigned char)*p == 0x80) {
-                                state = MAYBE_IDEOGRAPHIC_SPACE_2;
+                                state = IDLE;
+                        } else if (am_i_here(a, b, &p, beginning_mark->str, 1)) {
+                                block_beginning = p - beginning_mark->len + 1;
+                                state = MAYBE_MARK;
                         } else state = FAILURE;
                         break;
-                case MAYBE_IDEOGRAPHIC_SPACE_2:
-                        if ((unsigned char)*p == 0x80) state = INIT;
-                        else state = FAILURE;
-                        break;
                 case MAYBE_MARK:
-                        s = g_string_new(NULL);
-                        for (size_t i = 0; i < beginning_mark->len; i++) {
-                                g_string_append_c(s, *(p + i));
-                        }
-                        if (strcmp(s->str, beginning_mark->str) == 0) {
-                                /* 不允许出现嵌套的标记起始符 */
+                        if (am_i_here(a, b, &p, beginning_mark->str, 1)) {
                                 state = FAILURE;
-                        } else if (strcmp(s->str, end_mark->str) == 0) {
-                                end = p + end_mark->len;
+                        } else if (am_i_here(a, b, &p, end_mark->str, 1)) {
+                                block_end = p + 1;
                                 state = SUCCESS;
-                        } else {
-                                state = MAYBE_MARK;
-                        }
-                        g_string_free(s, TRUE);
+                        } else state = MAYBE_MARK;
                         break;
                 default:
                         g_error("Illegal state happens in line %lu.",
@@ -341,19 +304,19 @@ static GString *extract_small_block_at_head(OrezToken *t,
                 }
                 if (state == SUCCESS) {
                         result = g_string_new(NULL);
-                        for (char *q = beginning; q != end; q++) {
+                        for (char *q = block_beginning; q != block_end; q++) {
                                 g_string_append_c(result, *q);
                         }
                         /* 从 t 的内容中删除语言标记 */
                         GString *new_content = g_string_new(NULL);
-                        for (char *q = end; *q != '\0'; q++) {
+                        for (char *q = block_end; *q != '\0'; q++) {
                                 g_string_append_c(new_content, *q);
                         }
                         g_string_free(t->content, TRUE);
                         t->content = new_content;
                         t->line_number = new_line_number;
                         break;
-                } else if (state == FAILURE) break;
+                } else if (state == FAILURE || *p == '\0') break;
                 else p++;
         }
         return result;
@@ -402,52 +365,43 @@ static GList *create_block_token(GList *tokens,
 static GString *extract_operator(OrezToken *t, GString *operator)
 {
         GString *result = NULL;
-        char *a = strstr(t->content->str, operator->str);
-        if (!a) return result;
-        bool is_legal = TRUE;
-        if (a == t->content->str) ;
+        /* 构造字符串区间 [a, b) */
+        char *a = t->content->str;
+        char *b = strstr(a, operator->str);
+        if (!b) return result;
+        bool is_legal = true;
+        if (b == t->content->str) ;
         else {
-                enum {INIT,
-                        MAYBE_IDEOGRAPHIC_SPACE_1,
-                        MAYBE_IDEOGRAPHIC_SPACE_2,
-                        FAILURE} state = INIT;
-                char *p = a - 1;
+                enum {IDLE, FAILURE} state = IDLE;
+                char *p = b - 1;
+                /* 以 p 逆序遍历 [a, b) */
                 while (1) {
                         switch (state) {
-                        case INIT:
-                                if (*p == ' ' || *p == '\t' || *p == '\n') ;
-                                else if ((unsigned char)*p == 0x80) {
-                                        state == MAYBE_IDEOGRAPHIC_SPACE_1;
-                                } else state = FAILURE;
-                                break;
-                        case MAYBE_IDEOGRAPHIC_SPACE_1:
-                                if ((unsigned char)*p == 0x80) {
-                                        state = MAYBE_IDEOGRAPHIC_SPACE_2;
-                                } else state = FAILURE;
-                                break;
-                        case MAYBE_IDEOGRAPHIC_SPACE_2:
-                                if ((unsigned char)*p == 0xE3) state == INIT;
+                        case IDLE:
+                                if (*p == ' '
+                                    || *p == '\t'
+                                    || *p == '\n'
+                                    || am_i_here(a, b, &p, "　", -1)) ;
                                 else state = FAILURE;
                                 break;
                         default:
-                                g_error("Illegal state happens in line %lu.",
-                                        t->line_number);
+                                g_error("Illegal state happens in line %lu.", t->line_number);
                         }
-                        if (state == FAILURE) {
-                                is_legal = FALSE;
+                        if (p == a) break;
+                        else if (state == FAILURE) {
+                                is_legal = false;
                                 break;
-                        } else if (p == t->content->str) break;
-                        else p--;
+                        } else p--;
                 }
         }
         if (is_legal) {
                 /* 从 t 中删除片段追加运算符及其之前的空白字符 */
                 GString *new_content = g_string_new(NULL);
                 size_t new_line_number = t->line_number;
-                for (char *p = t->content->str; p != a; p++) {
+                for (char *p = a; p != b; p++) {
                         if (*p == '\n') new_line_number++;
                 }
-                for (char *p = a + operator->len; *p != '\0'; p++) {
+                for (char *p = b + operator->len; *p != '\0'; p++) {
                         g_string_append_c(new_content, *p);
                 }
                 g_string_free(t->content, TRUE);
@@ -475,63 +429,49 @@ typedef struct {
         void *a;
         void *b;
 } OrezPair;
+
 static OrezPair *find_snippet_reference(GString *content,
                                         GString *reference_beginning_mark,
                                         GString *reference_end_mark,
                                         GString *name_continuation)
 {
-        char *p = content->str, *begin = NULL, *end = NULL;
-        enum {INIT,
-                MAYBE_LINEBREAK,
-                MAYBE_IDEOGRAPHIC_SPACE_1,
-                MAYBE_IDEOGRAPHIC_SPACE_2,
-                FAILURE} state;
+        char *a = content->str, *begin = NULL, *end = NULL;
+        enum {IDLE, MAYBE_LINEBREAK, FAILURE} state;
         while (1) {
-                begin = strstr(p, reference_beginning_mark->str);
+                begin = strstr(a, reference_beginning_mark->str);
                 if (!begin) return NULL;
-                end = strstr(p, reference_end_mark->str);
+                end = strstr(a, reference_end_mark->str);
                 if (!end || begin >= end) return NULL;
-                /* 校验 [begin, end] 区间是否为合法的片段引用 */
+                /*区间 [q, p] 是片段名 */
+                char *p = end - 1;
+                char *q = begin + reference_beginning_mark->len;
+                /* 逆序遍历 [q, end)，校验片段名是否合法 */
                 bool legal = TRUE;
-                char *q = end - 1;
-                char *r = begin + reference_beginning_mark->len;
-                state = INIT;
+                state = IDLE;
                 while (1) {
-                        if (q == r) break;
                         switch (state) {
-                        case INIT:
-                                if (*q == '\n') state = MAYBE_LINEBREAK;
+                        case IDLE:
+                                if (*p == '\n') state = MAYBE_LINEBREAK;
                                 break;
                         case MAYBE_LINEBREAK:
-                                if (*q == ' ') ;
-                                else if (*q == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_1;
-                                else if (hit_before_needle(content,
-                                                           q,
-                                                           name_continuation)) {
-                                        q -= (name_continuation->len - 1);
-                                        state = INIT;
+                                if (*p == ' '
+                                    || am_i_here(q, end - 1, &p, "　", -1)) ;
+                                else if (am_i_here(q, end - 1, &p,
+                                                   name_continuation->str, -1)) {
+                                        state = IDLE;
                                 } else state = FAILURE;
                                 break;
-                        case MAYBE_IDEOGRAPHIC_SPACE_1:
-                                if (*q == 0x80) state = MAYBE_IDEOGRAPHIC_SPACE_2;
-                                else state = FAILURE;
-                                break;
-                        case MAYBE_IDEOGRAPHIC_SPACE_2:
-                                if (*q == 0xE3) state = INIT;
-                                else state = FAILURE;
-                                break;
                         default:
-                                g_error("Illegal state happens in <<< %s >>>.",
-                                        content->str);
+                                g_error("Illegal state happens in <<< %s >>>.", a);
                         }
                         if (state == FAILURE) {
                                 legal = FALSE;
                                 break;
-                        }
-                        q--;
+                        } else if (p == q) break;
+                        else p--;
                 }
                 if (legal) break;
-                else p = r;
+                else a = q;
         }
         if (begin && end) {
                 /* 前闭后开区间 */
@@ -610,8 +550,7 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
 {
         FILE *input = fopen(input_file_name, "r");
         if (!input) {
-                fprintf(stderr, "Failed to open input file!\n");
-                exit(EXIT_FAILURE);
+                g_error("Failed to open input file!\n");
         }
         GList *tokens = NULL;
         GString *cache = g_string_new(NULL);
@@ -619,7 +558,7 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                 int status = read_char_from_input(input, cache);
                 if (status == EOF) break;
                 else {
-                        bool t = has_snippet_delimiter(cache, symbols->snippet_delimiter);
+                        bool t = tail_is_snippet_delimiter(cache, symbols->snippet_delimiter);
                         if (t) {
                                 g_string_erase(cache, cache->len - symbols->snippet_delimiter->len, -1);
                                 tokens = orez_snippet(tokens, cache);
@@ -766,16 +705,15 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                                 if (a->type == OREZ_SNIPPET_NAME_DELIMITER
                                     || a->type == OREZ_LANGUAGE_END_MARK
                                     || a->type == OREZ_TAG_END_MARK) {
-                                        GString *appending_mark = extract_operator(t,
-                                                                                   symbols->snippet_appending_mark);
+                                        GString *appending_mark = extract_operator(t, symbols->snippet_appending_mark);
                                         if (appending_mark) {
                                                 tokens = create_operator_token(tokens,
                                                                                it,
                                                                                appending_mark,
                                                                                OREZ_SNIPPET_APPENDING_MARK);
                                         } else {
-                                                GString *prepending_mark = extract_operator(t,
-                                                                                            symbols->snippet_prepending_mark);
+                                                GString *prepending_mark
+                                                        = extract_operator(t, symbols->snippet_prepending_mark);
                                                 if (prepending_mark) {
                                                         tokens = create_operator_token(tokens,
                                                                                        it,
@@ -783,9 +721,10 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                                                                                        OREZ_SNIPPET_PREPENDING_MARK);
                                                 }
                                         }
-                                        GString *tag_mark = extract_small_block_at_head(t,
-                                                                                        symbols->tag_beginning_mark,
-                                                                                        symbols->tag_end_mark);
+                                        GString *tag_mark
+                                                = extract_small_block_at_head(t,
+                                                                              symbols->tag_beginning_mark,
+                                                                              symbols->tag_end_mark);
                                         if (tag_mark) {
                                                 tokens = create_block_token(tokens,
                                                                             it,
