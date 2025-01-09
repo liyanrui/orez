@@ -15,7 +15,7 @@ typedef enum  {
         OREZ_TAG_END_MARK, /* 代码片段标签终结符 */
         OREZ_SNIPPET_REFERENCE_BEGINNING_MARK, /* 代码片段引用开始符 */
         OREZ_SNIPPET_REFERENCE_END_MARK, /* 代码片段引用终结符 */
-        OREZ_TEXT /* 普通字符 */
+        OREZ_TEXT /* 普通文本 */
 } OrezTokenType;
 typedef struct {
         OrezTokenType type; /* 记号类型标识 */
@@ -76,6 +76,14 @@ static bool am_i_here(char *a, char *b, char **cursor, char *me, int dir)
         }
         free(t);
         return result;
+}
+static GString *make_padding(size_t len)
+{
+        GString *padding = g_string_new(NULL);
+        for (size_t i = 0; i < len; i++) {
+                g_string_append_c(padding, ' ');
+        }
+        return padding;
 }
 static bool tail_is_snippet_delimiter(GString *cache,
                                       GString *snippet_delimiter)
@@ -251,7 +259,7 @@ static char *find_name_delimiter(OrezToken *t,
                         } else state = FAILURE;
                         break;
                 default:
-                        g_error("Illegal state happens in line %lu.", t->line_number);
+                        g_error("Illegal state in line %lu.", t->line_number);
                 }
                 if (p == a) {
                         /* 字符串逆序遍历到头，此时匹配过程既未成功，
@@ -299,7 +307,7 @@ static GString *extract_small_block_at_head(OrezToken *t,
                         } else state = MAYBE_MARK;
                         break;
                 default:
-                        g_error("Illegal state happens in line %lu.",
+                        g_error("Illegal state in line %lu.",
                                 t->line_number);
                 }
                 if (state == SUCCESS) {
@@ -337,14 +345,14 @@ static GList *create_block_token(GList *tokens,
                                  GList *x,
                                  GString *block,
                                  GString *beginning_mark,
-                                 OrezTokenType beginning_mark_token_type,
+                                 OrezTokenType beginning_mark_type,
                                  GString *end_mark,
-                                 OrezTokenType end_mark_token_type)
+                                 OrezTokenType end_mark_type)
 {
         OrezToken *t = x->data;
         /* 构建块起始记号 */
         OrezToken *beginning = malloc(sizeof(OrezToken));
-        beginning->type = beginning_mark_token_type;
+        beginning->type = beginning_mark_type;
         beginning->line_number = t->line_number;
         beginning->content = g_string_new(beginning_mark->str);
         tokens = g_list_insert_before(tokens, x, beginning);
@@ -356,7 +364,7 @@ static GList *create_block_token(GList *tokens,
         tokens = g_list_insert_before(tokens, x, body);
         /* 构建块终止记号 */
         OrezToken *end = malloc(sizeof(OrezToken));
-        end->type = end_mark_token_type;
+        end->type = end_mark_type;
         end->line_number = t->line_number;
         end->content = g_string_new(end_mark->str);
         tokens = g_list_insert_before(tokens, x, end);
@@ -385,7 +393,8 @@ static GString *extract_operator(OrezToken *t, GString *operator)
                                 else state = FAILURE;
                                 break;
                         default:
-                                g_error("Illegal state happens in line %lu.", t->line_number);
+                                g_error("Illegal state in line %lu.",
+                                        t->line_number);
                         }
                         if (p == a) break;
                         else if (state == FAILURE) {
@@ -429,7 +438,6 @@ typedef struct {
         void *a;
         void *b;
 } OrezPair;
-
 static OrezPair *find_snippet_reference(GString *content,
                                         GString *reference_beginning_mark,
                                         GString *reference_end_mark,
@@ -462,7 +470,7 @@ static OrezPair *find_snippet_reference(GString *content,
                                 } else state = FAILURE;
                                 break;
                         default:
-                                g_error("Illegal state happens in <<< %s >>>.", a);
+                                g_error("Illegal state in <<< %s >>>.", a);
                         }
                         if (state == FAILURE) {
                                 legal = FALSE;
@@ -508,8 +516,10 @@ static GList *split_snippet(GList *tokens,
         t_b->content = b;
         /* 片段名称 */
         GString *c = g_string_new(NULL);
-        char *left = (char *)(snippet_reference->a) + snippet_reference_beginning_mark->len;
-        char *right = (char *)(snippet_reference->b) - snippet_reference_end_mark->len;
+        char *left = (char *)(snippet_reference->a)
+                + snippet_reference_beginning_mark->len;
+        char *right = (char *)(snippet_reference->b)
+                - snippet_reference_end_mark->len;
         for (char *p = left; p != right; p++) {
                 g_string_append_c(c, *p);
                 if (*p == '\n') line_number++;
@@ -529,7 +539,8 @@ static GList *split_snippet(GList *tokens,
         GString *e = g_string_new(NULL);
         bool after_reference = TRUE;
         for (char *p = snippet_reference->b; *p != '\0'; p++) {
-                if (after_reference) { /* 忽略与片段引用之后与片段引用终止符同一行的文本 */
+                if (after_reference) {
+                         /* 忽略与片段引用之后与片段引用终止符同一行的文本 */
                         if (*p == '\n') {
                                 after_reference = FALSE;
                                 g_string_append_c(e, *p);
@@ -562,12 +573,13 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                         if (t) {
                                 g_string_erase(cache, cache->len - symbols->snippet_delimiter->len, -1);
                                 tokens = orez_snippet(tokens, cache);
-                                tokens = orez_snippet_delimiter(tokens, symbols->snippet_delimiter);
+                                tokens = orez_snippet_delimiter(tokens,
+                                                                symbols->snippet_delimiter);
                                 cache = g_string_new(NULL); /* 刷新 cache */
                         }
                 }
         }
-        if (cache->len > 0) { /* 读到文件结尾，若 cache 中含有内容，则将其视为文档或源码片段 */
+        if (cache->len > 0) {
                 tokens = orez_snippet(tokens, cache);
         } else g_string_free(cache, TRUE);
         fclose(input);
@@ -636,59 +648,62 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                         if (prev) {
                                 OrezToken *a = prev->data;
                                 if (a->type == OREZ_SNIPPET_NAME_DELIMITER) {
-                                        GString *language_mark = extract_small_block_at_head(t,
-                                                                                             symbols->language_beginning_mark,
-                                                                                             symbols->language_end_mark);
-                                        if (language_mark) {
-                                                tokens = create_block_token(tokens,
-                                                                            it,
-                                                                            language_mark,
-                                                                            symbols->language_beginning_mark,
-                                                                            OREZ_LANGUAGE_BEGINNING_MARK,
-                                                                            symbols->language_end_mark,
-                                                                            OREZ_LANGUAGE_END_MARK);
-                                                GString *tag_ref_mark = extract_small_block_at_head(t,
-                                                                                                      symbols->tag_beginning_mark,
-                                                                                                      symbols->tag_end_mark);
-                                                if (tag_ref_mark) {
+                                        do {
+                                                GString *language = extract_small_block_at_head(t,
+                                                                                                symbols->language_beginning_mark,
+                                                                                                symbols->language_end_mark);
+                                                if (language) {
                                                         tokens = create_block_token(tokens,
                                                                                     it,
-                                                                                    tag_ref_mark,
+                                                                                    language,
+                                                                                    symbols->language_beginning_mark,
+                                                                                    OREZ_LANGUAGE_BEGINNING_MARK,
+                                                                                    symbols->language_end_mark,
+                                                                                    OREZ_LANGUAGE_END_MARK);
+                                                        g_string_free(language, TRUE);
+                                                }
+                                                GString *tag_reference = extract_small_block_at_head(t,
+                                                                                                     symbols->tag_beginning_mark,
+                                                                                                     symbols->tag_end_mark);
+                                                if (tag_reference) {
+                                                        tokens = create_block_token(tokens,
+                                                                                    it,
+                                                                                    tag_reference,
                                                                                     symbols->tag_beginning_mark,
                                                                                     OREZ_TAG_BEGINNING_MARK,
                                                                                     symbols->tag_end_mark,
                                                                                     OREZ_TAG_END_MARK);
-                                                        g_string_free(tag_ref_mark, TRUE);
+                                                        g_string_free(tag_reference, TRUE);
                                                 }
-                                                g_string_free(language_mark, TRUE);
-                                        } else {
-                                                GString *tag_ref_mark = extract_small_block_at_head(t,
-                                                                                                      symbols->tag_beginning_mark,
-                                                                                                      symbols->tag_end_mark);
-                                                if (tag_ref_mark) {
+                                        } while (0);
+                                        do {
+                                                GString *language = extract_small_block_at_head(t,
+                                                                                                symbols->language_beginning_mark,
+                                                                                                symbols->language_end_mark);
+                                                if (language) {
                                                         tokens = create_block_token(tokens,
                                                                                     it,
-                                                                                    tag_ref_mark,
+                                                                                    language,
+                                                                                    symbols->language_beginning_mark,
+                                                                                    OREZ_LANGUAGE_BEGINNING_MARK,
+                                                                                    symbols->language_end_mark,
+                                                                                    OREZ_LANGUAGE_END_MARK);
+                                                        g_string_free(language, TRUE);
+                                                }
+                                                GString *tag_reference = extract_small_block_at_head(t,
+                                                                                                     symbols->tag_beginning_mark,
+                                                                                                     symbols->tag_end_mark);
+                                                if (tag_reference) {
+                                                        tokens = create_block_token(tokens,
+                                                                                    it,
+                                                                                    tag_reference,
                                                                                     symbols->tag_beginning_mark,
                                                                                     OREZ_TAG_BEGINNING_MARK,
                                                                                     symbols->tag_end_mark,
                                                                                     OREZ_TAG_END_MARK);
-                                                        language_mark = extract_small_block_at_head(t,
-                                                                                                    symbols->language_beginning_mark,
-                                                                                                    symbols->language_end_mark);
-                                                        if (language_mark) {
-                                                                tokens = create_block_token(tokens,
-                                                                                            it,
-                                                                                            language_mark,
-                                                                                            symbols->language_beginning_mark,
-                                                                                            OREZ_LANGUAGE_BEGINNING_MARK,
-                                                                                            symbols->language_end_mark,
-                                                                                            OREZ_LANGUAGE_END_MARK);
-                                                                g_string_free(language_mark, TRUE);
-                                                        }
-                                                        g_string_free(tag_ref_mark, TRUE);
+                                                        g_string_free(tag_reference, TRUE);
                                                 }
-                                        }
+                                        } while (0);
                                 }
                         }
                 }
@@ -902,7 +917,7 @@ static void print_syntax_tree(GNode *root)
                                 printf("<snippet text>\n");
                                 break;
                         default:
-                                g_error("Illegal syntax maybe happens in %lu.\n",
+                                g_error("Illegal syntax in %lu.\n",
                                         first_token_line_number(root));
                         }
                         if (a->tokens) print_tokens(a->tokens);
@@ -1028,7 +1043,8 @@ static void create_child_nodes_of_snippet_with_name(GNode *x)
                 g_error("Line %lu: Illegal snippet name.", token->line_number);
         }
         it = g_list_next(it);
-        /* 构造可能存在的语言和标签引用结点，之所以重复两次，是因为 Orez 语法未区分语言和标签引用的先后 */
+        /* 构造可能存在的语言和标签引用结点，
+           之所以重复两次，是因 Orez 语法未区分语言和标签引用的先后 */
         it = create_language(x, it);
         it = create_tag_reference(x, it);
         it = create_language(x, it);
@@ -1181,7 +1197,6 @@ static void init_tie(GHashTable *relations,
                      GPtrArray *useless_characters)
 {
         GString *name = NULL;
-        /* 从 x 获取片段名并将其存于 name */
         for (GNode *p = x->children; p != NULL; p = p->next) {
                 OrezSyntax *a = p->data;
                 if (a->type == OREZ_SNIPPET_NAME) {
@@ -1193,7 +1208,6 @@ static void init_tie(GHashTable *relations,
         if (!name) {
                 g_error("Line %lu: Illegal snippet.", first_token_line_number(x));
         }
-        /* 将 x 存入 relations */
         GString *key = compact_text(name, useless_characters);
         OrezTie *tie = g_hash_table_lookup(relations, key);
         if (tie) {
@@ -1218,17 +1232,14 @@ static void init_tie(GHashTable *relations,
                 if (tag_reference) {
                         GString *t = compact_text(tag_reference, useless_characters);
                         int id = -1;
-                        /* 从逻辑（时间）序列中寻找与标签引用相同的标签 */
                         for (int i = 0; i < tie->time_order->len; i++) {
                                 GNode *y = g_ptr_array_index(tie->time_order, i);
                                 for (GNode *it = y->children; it != NULL; it = it->next) {
                                         OrezSyntax *a = it->data;
                                         if (a->type == OREZ_SNIPPET_TAG) {
-                                                OrezToken *tag_token =
-                                                        g_list_first(a->tokens)->data;
-                                                GString *s =
-                                                        compact_text(tag_token->content,
-                                                                     useless_characters);
+                                                OrezToken *tag_token = g_list_first(a->tokens)->data;
+                                                GString *s = compact_text(tag_token->content,
+                                                                          useless_characters);
                                                 if (g_string_equal(s, t)) {
                                                         id = i;
                                                         g_string_free(s, TRUE);
@@ -1249,7 +1260,7 @@ static void init_tie(GHashTable *relations,
                                         g_ptr_array_insert(tie->time_order, id, x);
                                 } else {
                                         g_error("Line %lu: The snippet needs an operator.",
-                                                first_token_line_number(x));
+                                                 first_token_line_number(x));
                                 }
                         }
                         g_string_free(t, TRUE);
@@ -1652,25 +1663,19 @@ static void strip_snippet_with_name(GNode *x, GPtrArray *useless_characters)
                                 b = p->data;
                                 t_b = g_list_first(b->tokens)->data;
                                 if (b->type == OREZ_SNIPPET_REFERENCE) {
-                                        t_b->content =
-                                                orez_string_strip(t_b->content,
-                                                                  useless_characters);
+                                        t_b->content = orez_string_strip(t_b->content, useless_characters);
                                 }
                         }
-                        /* 此时，b 指向最后一项语法单元，仅去除其尾部冗白 */
                         if (b->type == OREZ_SNIPPET_TEXT) {
-                                t_b->content =
-                                        orez_string_chomp(t_b->content,
-                                                          useless_characters);
+                                t_b->content = orez_string_chomp(t_b->content, useless_characters);
                         } else {
                                 g_warning("Line %lu: Illegal snippet.", t_b->line_number);
                         }
                 } else {
                         OrezSyntax *b = it->data;
                         OrezToken *t_b = g_list_first(b->tokens)->data;
-                        t_b->content =
-                                orez_string_strip(t_b->content,
-                                                  useless_characters);
+                        t_b->content = orez_string_strip(t_b->content,
+                                                         useless_characters);
                 }
         }
 }
@@ -1686,13 +1691,14 @@ static void strip_all_snippets(GNode *root,
                 }
         }
 }
-static void append_yaml_string(GString *cache, char *text, const char *indent)
+static void append_yaml_string(GString *cache, char *text, const char *indent, char *padding)
 {
         /* 处理多行字串的缩进 */
         for (char *p = text; *p != '\0'; p++) {
                 g_string_append_c(cache, *p);
                 if (*p == '\n') {
                         g_string_append(cache, indent);
+                        if (padding) g_string_append(cache, padding);
                 }
         }
 }
@@ -1702,14 +1708,17 @@ static GList *output_snippet(GNode *x, GList *yaml)
         OrezToken *snippet_token = g_list_first(snippet->tokens)->data;
         GString *cache = g_string_new("- type: snippet\n");
         g_string_append(cache, "  content: |-\n");
-        g_string_append(cache, "    '"); /* 缩进 4 个空格，增加左引号 */
-        append_yaml_string(cache, snippet_token->content->str, "    "); /* 缩进 4 个空格 */
+        /* 缩进 4 个空格，增加左引号 */
+        g_string_append(cache, "    '");
+         /* 缩进 4 个空格 */
+        append_yaml_string(cache, snippet_token->content->str, "    ", NULL);
         g_string_append(cache, "'\n"); /* 增加右引号 */
         return g_list_append(yaml, cache);
 }
 static GList *output_snippet_with_name(GNode *x,
                                        GHashTable *relations,
                                        GPtrArray *useless_characters,
+                                       char *snippet_reference_padding,
                                        GList *yaml)
 {
         OrezSyntax *name = g_node_first_child(x)->data;
@@ -1726,7 +1735,7 @@ static GList *output_snippet_with_name(GNode *x,
                                 OrezToken *t = g_list_first(a->tokens)->data;
                                 g_string_append(cache, "  name: |-\n");
                                 g_string_append(cache, "    '");
-                                append_yaml_string(cache, t->content->str, "    ");
+                                append_yaml_string(cache, t->content->str, "    ", NULL);
                                 g_string_append(cache, "'\n");
                                 /* 片段名的 hash 值 */
                                 g_string_append_printf(cache, "  hash: '%s'\n", x_tie_key->str);
@@ -1755,7 +1764,7 @@ static GList *output_snippet_with_name(GNode *x,
                                 g_string_append(cache, "  tag_reference: \n");
                                 g_string_append(cache, "    name: |-\n");
                                 g_string_append(cache, "      '");
-                                append_yaml_string(cache, t->content->str, "       ");
+                                append_yaml_string(cache, t->content->str, "       ", NULL);
                                 g_string_append(cache, "'\n");
                                 /* 输出 hash */
                                 GString *tag_reference_hash = compact_text(t->content, useless_characters);
@@ -1781,7 +1790,7 @@ static GList *output_snippet_with_name(GNode *x,
                                 g_string_append(cache, "  tag: \n");
                                 g_string_append(cache, "    name: |-\n");
                                 g_string_append(cache, "      '");
-                                append_yaml_string(cache, t->content->str, "       ");
+                                append_yaml_string(cache, t->content->str, "       ", NULL);
                                 g_string_append(cache, "'\n");
                                 /* 输出 hash */
                                 GString *tag_hash = compact_text(t->content, useless_characters);
@@ -1798,7 +1807,7 @@ static GList *output_snippet_with_name(GNode *x,
                                         if (b->type == OREZ_TEXT) {
                                                 g_string_append(cache, "    - text: |-\n");
                                                 g_string_append(cache, "        '");
-                                                append_yaml_string(cache, t_b->content->str, "        ");
+                                                append_yaml_string(cache, t_b->content->str, "        ", NULL);
                                                 g_string_append(cache, "'\n");
                                         } else { /* 片段引用 */
                                                 GString *y_tie_key = compact_text(t_b->content, useless_characters);
@@ -1806,7 +1815,10 @@ static GList *output_snippet_with_name(GNode *x,
                                                 g_string_append(cache, "    - reference: \n");
                                                 g_string_append(cache, "        name: |-\n");
                                                 g_string_append(cache, "          '");
-                                                append_yaml_string(cache, t_b->content->str, "          ");
+                                                append_yaml_string(cache,
+                                                                   t_b->content->str,
+                                                                   "          ",
+                                                                   snippet_reference_padding);
                                                 g_string_append(cache, "'\n");
                                                 g_string_append_printf(cache, "        hash: '%s'\n", y_tie_key->str);
                                                 /* 输出引用片段的所有 ID */
@@ -1824,40 +1836,38 @@ static GList *output_snippet_with_name(GNode *x,
                         } while (0);
                         break;
                 default:
-                        printf("Line %lu: there is unknown syntax in snippet <%s>.\n",
+                        printf("Line %lu: Unknown syntax in snippet <%s>.\n",
                                first_token_line_number(g_node_first_child(x)),
                                name_token->content->str);
                 }
         }
         if (x_tie->emissions->len > 0) {
-                do {
-                        g_string_append(cache, "  emissions: \n");
-                        for (size_t i = 0; i < x_tie->emissions->len; i++) {
-                                GNode *e = g_ptr_array_index(x_tie->emissions, i);
-                                OrezSyntax *b = g_node_first_child(e)->data;
-                                OrezToken *t_b = g_list_first(b->tokens)->data;
-                                GString *y_tie_key = compact_text(t_b->content, useless_characters);
-                                OrezTie *y_tie = g_hash_table_lookup(relations, y_tie_key);
-                                g_string_append(cache, "    - emission: \n");
-                                g_string_append(cache, "        name: |-\n");
-                                g_string_append(cache, "          '");
-                                append_yaml_string(cache, t_b->content->str, "          ");
-                                g_string_append(cache, "'\n");
-                                g_string_append_printf(cache, "        hash: '%s'\n", y_tie_key->str);
-                                /* 确定 id */
-                                if (y_tie->spatial_order->len > 1) {
-                                        for (size_t j = 0; j < y_tie->spatial_order->len; j++) {
-                                                if (e == g_ptr_array_index(y_tie->spatial_order, j)) {
-                                                        g_string_append_printf(cache,
-                                                                               "        id: %lu\n",
-                                                                               j + 1);
-                                                        break;
-                                                }
+                g_string_append(cache, "  emissions: \n");
+                for (size_t i = 0; i < x_tie->emissions->len; i++) {
+                        GNode *e = g_ptr_array_index(x_tie->emissions, i);
+                        OrezSyntax *b = g_node_first_child(e)->data;
+                        OrezToken *t_b = g_list_first(b->tokens)->data;
+                        GString *y_tie_key = compact_text(t_b->content, useless_characters);
+                        OrezTie *y_tie = g_hash_table_lookup(relations, y_tie_key);
+                        g_string_append(cache, "    - emission: \n");
+                        g_string_append(cache, "        name: |-\n");
+                        g_string_append(cache, "          '");
+                        append_yaml_string(cache, t_b->content->str, "          ", NULL);
+                        g_string_append(cache, "'\n");
+                        g_string_append_printf(cache, "        hash: '%s'\n", y_tie_key->str);
+                        /* 确定 id */
+                        if (y_tie->spatial_order->len > 1) {
+                                for (size_t j = 0; j < y_tie->spatial_order->len; j++) {
+                                        if (e == g_ptr_array_index(y_tie->spatial_order, j)) {
+                                                g_string_append_printf(cache,
+                                                                       "        id: %lu\n",
+                                                                       j + 1);
+                                                break;
                                         }
                                 }
-                                g_string_free(y_tie_key, TRUE);
                         }
-                } while (0);
+                        g_string_free(y_tie_key, TRUE);
+                }
         }
         g_string_free(x_tie_key, TRUE);
         return g_list_append(yaml, cache);
@@ -1945,31 +1955,40 @@ static OrezSymbols *orez_create_symbols(const char *configure_file_name)
                 }
                 if (user_config) {
                         if (user_config->snippet_delimiter) {
-                                config.snippet_delimiter = user_config->snippet_delimiter;
+                                config.snippet_delimiter
+                                        = user_config->snippet_delimiter;
                         }
                         if (user_config->snippet_name_delimiter) {
-                                config.snippet_name_delimiter = user_config->snippet_name_delimiter;
+                                config.snippet_name_delimiter
+                                        = user_config->snippet_name_delimiter;
                         }
                         if (user_config->snippet_name_continuation) {
-                                config.snippet_name_continuation = user_config->snippet_name_continuation;
+                                config.snippet_name_continuation
+                                        = user_config->snippet_name_continuation;
                         }
                         if (user_config->language_beginning_mark) {
-                                config.language_beginning_mark = user_config->language_beginning_mark;
+                                config.language_beginning_mark
+                                        = user_config->language_beginning_mark;
                         }
                         if (user_config->language_end_mark) {
-                                config.language_end_mark = user_config->language_end_mark;
+                                config.language_end_mark
+                                        = user_config->language_end_mark;
                         }
                         if (user_config->snippet_appending_mark) {
-                                config.snippet_appending_mark = user_config->snippet_appending_mark;
+                                config.snippet_appending_mark
+                                        = user_config->snippet_appending_mark;
                         }
                         if (user_config->snippet_prepending_mark) {
-                                config.snippet_prepending_mark = user_config->snippet_prepending_mark;
+                                config.snippet_prepending_mark
+                                        = user_config->snippet_prepending_mark;
                         }
                         if (user_config->tag_beginning_mark) {
-                                config.tag_beginning_mark = user_config->tag_beginning_mark;
+                                config.tag_beginning_mark
+                                        = user_config->tag_beginning_mark;
                         }
                         if (user_config->tag_end_mark) {
-                                config.tag_end_mark = user_config->tag_end_mark;
+                                config.tag_end_mark
+                                        = user_config->tag_end_mark;
                         }
                         if (user_config->snippet_reference_beginning_mark) {
                                 config.snippet_reference_beginning_mark
@@ -1981,51 +2000,58 @@ static OrezSymbols *orez_create_symbols(const char *configure_file_name)
                         }
                 }
                 OrezSymbols *symbols = malloc(sizeof(OrezSymbols));
-                symbols->snippet_delimiter = g_string_new(config.snippet_delimiter);
-                symbols->snippet_name_delimiter = g_string_new(config.snippet_name_delimiter);
-                symbols->snippet_name_continuation = g_string_new(config.snippet_name_continuation);
-                symbols->language_beginning_mark = g_string_new(config.language_beginning_mark);
-                symbols->language_end_mark = g_string_new(config.language_end_mark);
-                symbols->snippet_appending_mark = g_string_new(config.snippet_appending_mark);
-                symbols->snippet_prepending_mark = g_string_new(config.snippet_prepending_mark);
-                symbols->tag_beginning_mark = g_string_new(config.tag_beginning_mark);
-                symbols->tag_end_mark = g_string_new(config.tag_end_mark);
-                symbols->snippet_reference_beginning_mark = g_string_new(config.snippet_reference_beginning_mark);
-                symbols->snippet_reference_end_mark = g_string_new(config.snippet_reference_end_mark);
+                *symbols = (OrezSymbols) {
+                        g_string_new(config.snippet_delimiter),
+                        g_string_new(config.snippet_name_delimiter),
+                        g_string_new(config.snippet_name_continuation),
+                        g_string_new(config.language_beginning_mark),
+                        g_string_new(config.language_end_mark),
+                        g_string_new(config.snippet_appending_mark),
+                        g_string_new(config.snippet_prepending_mark),
+                        g_string_new(config.tag_beginning_mark),
+                        g_string_new(config.tag_end_mark),
+                        g_string_new(config.snippet_reference_beginning_mark),
+                        g_string_new(config.snippet_reference_end_mark)
+                };
                 cyaml_free(&cyaml_config, &top_schema, user_config, 0);
                 return symbols;
         } else {
                 OrezSymbols *symbols = malloc(sizeof(OrezSymbols));
-                symbols->snippet_delimiter = g_string_new(config.snippet_delimiter);
-                symbols->snippet_name_delimiter = g_string_new(config.snippet_name_delimiter);
-                symbols->snippet_name_continuation = g_string_new(config.snippet_name_continuation);
-                symbols->language_beginning_mark = g_string_new(config.language_beginning_mark);
-                symbols->language_end_mark = g_string_new(config.language_end_mark);
-                symbols->snippet_appending_mark = g_string_new(config.snippet_appending_mark);
-                symbols->snippet_prepending_mark = g_string_new(config.snippet_prepending_mark);
-                symbols->tag_beginning_mark = g_string_new(config.tag_beginning_mark);
-                symbols->tag_end_mark = g_string_new(config.tag_end_mark);
-                symbols->snippet_reference_beginning_mark = g_string_new(config.snippet_reference_beginning_mark);
-                symbols->snippet_reference_end_mark = g_string_new(config.snippet_reference_end_mark);
+                *symbols = (OrezSymbols) {
+                        g_string_new(config.snippet_delimiter),
+                        g_string_new(config.snippet_name_delimiter),
+                        g_string_new(config.snippet_name_continuation),
+                        g_string_new(config.language_beginning_mark),
+                        g_string_new(config.language_end_mark),
+                        g_string_new(config.snippet_appending_mark),
+                        g_string_new(config.snippet_prepending_mark),
+                        g_string_new(config.tag_beginning_mark),
+                        g_string_new(config.tag_end_mark),
+                        g_string_new(config.snippet_reference_beginning_mark),
+                        g_string_new(config.snippet_reference_end_mark)
+                };
                 return symbols;
         }
 }
-bool orez_tangle_mode = FALSE;
-bool orez_weave_mode = FALSE;
-bool orez_show_line_number = FALSE;
+gboolean orez_tangle_mode = FALSE;
+gboolean orez_weave_mode = FALSE;
+gboolean orez_show_line_number = FALSE;
 char *orez_configure = NULL;
 char *orez_entrance = NULL;
 char *orez_output = NULL;
 char *orez_separator = NULL;
 static GOptionEntry orez_entries[] = {
-        {"config", 'c', 0, G_OPTION_ARG_STRING, &orez_configure, "Read configure file.", "<file name>"},
-        {"tangle", 't', 0, G_OPTION_ARG_NONE, &orez_tangle_mode, "use tangle.", NULL},
+        {"config", 'c', 0, G_OPTION_ARG_STRING, &orez_configure,
+         "Read configure file.", "<file name>"},
+        {"tangle", 't', 0, G_OPTION_ARG_NONE, &orez_tangle_mode,
+         "use tangle.", NULL},
         {"line", 'l', 0, G_OPTION_ARG_NONE, &orez_show_line_number,
          "Show line number when using tangle.", NULL},
         {"weave", 'w', 0, G_OPTION_ARG_NONE, &orez_weave_mode, "use weave.", NULL},
         {"entrance", 'e', 0, G_OPTION_ARG_STRING, &orez_entrance,
          "Set <snippet name> as the entrance for tangle.", "<snippet name>"},
-        {"output", 'o', 0, G_OPTION_ARG_STRING, &orez_output, "Send output into <file>.", "<file name>"},
+        {"output", 'o', 0, G_OPTION_ARG_STRING, &orez_output,
+         "Send output into <file>.", "<file name>"},
         {"separator", 's', 0, G_OPTION_ARG_STRING, &orez_separator,
          "Set the separator for multi-entrances and outputs.", "<character>"},
         {NULL}
@@ -2054,8 +2080,7 @@ int main(int argc, char **argv)
         g_ptr_array_add(useless_characters, g_string_new("　"));
         g_ptr_array_add(useless_characters, g_string_new("\t"));
         g_ptr_array_add(useless_characters, g_string_new("\n"));
-        GHashTable *relations = orez_create_relations(root,
-                                                      useless_characters);
+        GHashTable *relations = orez_create_relations(root, useless_characters);
         if (orez_tangle_mode) {
                 GPtrArray *entrances = g_ptr_array_new();
                 GPtrArray *file_names = g_ptr_array_new();
@@ -2102,13 +2127,19 @@ int main(int argc, char **argv)
         if (orez_weave_mode) {
                 spread_language_mark(root, relations, useless_characters);
                 strip_all_snippets(root, useless_characters);
+                GString *snippet_reference_padding
+                        = make_padding(symbols->snippet_delimiter->len);
                 GList *yaml = NULL;
                 for (GNode *it = root->children; it != NULL; it = it->next) {
                         OrezSyntax *a = it->data;
                         if (a->type == OREZ_SNIPPET) {
                                 yaml = output_snippet(it, yaml);
                         } else {
-                                yaml = output_snippet_with_name(it, relations, useless_characters, yaml);
+                                yaml = output_snippet_with_name(it,
+                                                                relations,
+                                                                useless_characters,
+                                                                snippet_reference_padding->str,
+                                                                yaml);
                         }
                 }
                 FILE *output = NULL;
@@ -2121,6 +2152,7 @@ int main(int argc, char **argv)
                 }
                 g_list_free(yaml);
                 if (output) fclose(output);
+                g_string_free(snippet_reference_padding, TRUE);
         }
         orez_destroy_relations(relations);
         for (size_t i = 0; i < useless_characters->len; i++) {
