@@ -1706,7 +1706,7 @@ static GList *output_snippet(GNode *x, GList *yaml)
 {
         OrezSyntax *snippet = x->data;
         OrezToken *snippet_token = g_list_first(snippet->tokens)->data;
-        GString *cache = g_string_new("- type: snippet\n");
+        GString *cache = g_string_new("- type: 0\n");
         g_string_append(cache, "  content: |-\n");
         /* 缩进 4 个空格，增加左引号 */
         g_string_append(cache, "    '");
@@ -1725,7 +1725,7 @@ static GList *output_snippet_with_name(GNode *x,
         OrezToken *name_token = g_list_first(name->tokens)->data;
         GString *x_tie_key = compact_text(name_token->content, useless_characters);
         OrezTie *x_tie = g_hash_table_lookup(relations, x_tie_key);
-        GString *cache = g_string_new("- type: snippet with name\n");
+        GString *cache = g_string_new("- type: 1\n");
         for (GNode *it = x->children; it != NULL; it = it->next) {
                 OrezSyntax *a = it->data;
                 switch (a->type) {

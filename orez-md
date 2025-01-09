@@ -74,7 +74,7 @@ if __name__=="__main__":
               "makefile":MakefileLexer, "gnuplot":GnuplotLexer,
               "plain":TextLexer, "elisp":EmacsLispLexer, "bash":BashLexer}
     for e in x:
-        if e["type"] == "snippet":
+        if e["type"] == 0:
             content = e["content"].strip("'")
             if len(content) > 0:
                 orez_output(content)
@@ -82,7 +82,7 @@ if __name__=="__main__":
                     orez_output("\n")
                 else:
                     orez_output("\n\n")
-        else:
+        elif e["type"] == 1:
             name = e["name"].strip("'") # 多行字串解析结果会保留包裹字符串的单引号
             hash = e["hash"] # 当行字符串解析结果不会出现包裹字符串的单引号……反正挺奇怪的。
             # pre begin
@@ -153,3 +153,5 @@ if __name__=="__main__":
                 orez_output("</pre>\n")
             else:
                 orez_output("</pre>\n\n")
+        else:
+            sys.stderr.write("Unknown snippet type!")

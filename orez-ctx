@@ -42,7 +42,7 @@ if __name__=="__main__":
     else:
         x = yaml.safe_load(sys.stdin)
     for e in x:
-        if e["type"] == "snippet":
+        if e["type"] == 0:
             content = e["content"].strip("'")
             if len(content) > 0:
                 orez_output(content)
@@ -50,7 +50,7 @@ if __name__=="__main__":
                     orez_output("\n")
                 else:
                     orez_output("\n\n")
-        else:
+        elif e["type"] == 1:
             # 代码块开始
             language = e["language"].upper();
             orez_output("\\start{0}\n".format(language))
@@ -91,3 +91,5 @@ if __name__=="__main__":
                 orez_output("\n\\stop{0}\n".format(language))
             else:
                 orez_output("\n\\stop{0}\n\n".format(language))
+        else:
+            sys.stderr.write("Unknown snippet type!");
