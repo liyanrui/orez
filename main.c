@@ -1601,7 +1601,6 @@ static GString *orez_string_chug(GString *text, GPtrArray *useless_characters)
         char *p = a;
         while (1) {
                 char *t = p;
-                if (*p == '\0') break;
                 for (size_t i = 0; i < useless_characters->len; i++) {
                         GString *c = g_ptr_array_index(useless_characters, i);
                         char *q = p;
@@ -1617,19 +1616,20 @@ static GString *orez_string_chug(GString *text, GPtrArray *useless_characters)
 static GString *orez_string_chomp(GString *text, GPtrArray *useless_characters)
 {
         if (text->len == 0) return text;
-        GString *new_text = g_string_new(NULL);
         /* 构造字符串闭区间 [a, b] */
         char *a = text->str, *b = text->str + text->len - 1;
+        GString *new_text = g_string_new(NULL);
         char *p = b;
         while (1) {
-                if (p == text->str) break;
                 char *t = p;
                 for (size_t i = 0; i < useless_characters->len; i++) {
                         GString *c = g_ptr_array_index(useless_characters, i);
                         char *q = p;
-                        if (am_i_here(a, p, &q, c->str, -1)) p = q - 1;
+                        if (am_i_here(a, p, &q, c->str, -1)) {
+                                p = q - 1;
+                        }
                 }
-                if (t == p) break;
+                if (t == p || p < a) break;
         }
         p++;
         for (char *q = text->str; q != p; q++) {
@@ -1805,10 +1805,14 @@ static GList *output_snippet_with_name(GNode *x,
                                         OrezSyntax *b = p->data;
                                         OrezToken *t_b = g_list_first(b->tokens)->data;
                                         if (b->type == OREZ_TEXT) {
-                                                g_string_append(cache, "    - text: |-\n");
-                                                g_string_append(cache, "        '");
-                                                append_yaml_string(cache, t_b->content->str, "        ", NULL);
-                                                g_string_append(cache, "'\n");
+                                                if (t_b->content->len > 0) {
+                                                        g_string_append(cache, "    - text: |-\n");
+                                                        g_string_append(cache, "        '");
+                                                        append_yaml_string(cache,
+                                                                           t_b->content->str,
+                                                                           "        ", NULL);
+                                                        g_string_append(cache, "'\n");
+                                                }
                                         } else { /* 片段引用 */
                                                 GString *y_tie_key = compact_text(t_b->content, useless_characters);
                                                 OrezTie *y_tie = g_hash_table_lookup(relations, y_tie_key);
