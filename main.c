@@ -618,7 +618,8 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                                 snippet->line_number = snippet_name_delimiter->line_number;
                                 cache = g_string_new(NULL);
                                 for (char *q = p + symbols->snippet_name_delimiter->len;
-                                     *q != '\0'; q++) {
+                                     *q != '\0';
+                                     q++) {
                                         g_string_append_c(cache, *q);
                                 }
                                 snippet->content = cache;
@@ -653,6 +654,7 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                                                                                                 symbols->language_beginning_mark,
                                                                                                 symbols->language_end_mark);
                                                 if (language) {
+                                                        language = g_string_ascii_down(language);
                                                         tokens = create_block_token(tokens,
                                                                                     it,
                                                                                     language,
@@ -681,6 +683,7 @@ static GList *orez_lexer(const char *input_file_name, OrezSymbols *symbols)
                                                                                                 symbols->language_beginning_mark,
                                                                                                 symbols->language_end_mark);
                                                 if (language) {
+                                                        language = g_string_ascii_down(language);
                                                         tokens = create_block_token(tokens,
                                                                                     it,
                                                                                     language,
@@ -1629,7 +1632,8 @@ static GString *orez_string_chomp(GString *text, GPtrArray *useless_characters)
                                 p = q - 1;
                         }
                 }
-                if (t == p || p < a) break;
+                if (t == p /* 走不动了 */
+                    || p < a /* 走过头了 */ ) break;
         }
         p++;
         for (char *q = text->str; q != p; q++) {

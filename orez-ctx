@@ -78,9 +78,11 @@ if __name__=="__main__":
                 orez_output("\n/BTEX\\reference[%s]{<%s>}\\OrezReference{<%s>}/ETEX" \
                             % (tag_hash, tag_name, tag_name))
             # 有名片段内容
+            if e["content"] is None:
+                e["content"] = [{'text':""}]
             for p in e["content"]:
                 if "text" in p:
-                        orez_output(p["text"].strip("'"))
+                    orez_output(p["text"].strip("'"))
                 else:
                     snippet_reference_format(p["reference"])
             # 出射域

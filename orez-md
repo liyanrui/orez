@@ -2,6 +2,7 @@
 import sys
 import yaml
 from pygments import highlight
+from pygments.lexers import AwkLexer
 from pygments.lexers import CLexer
 from pygments.lexers import CppLexer
 from pygments.lexers import Python3Lexer
@@ -13,6 +14,9 @@ from pygments.lexers import TexLexer
 from pygments.lexers import GnuplotLexer
 from pygments.lexers import TextLexer
 from pygments.lexers import EmacsLispLexer
+from pygments.lexers import HtmlLexer
+from pygments.lexers import MarkdownLexer
+from pygments.lexers import CssLexer
 from pygments.formatters import HtmlFormatter
 
 def orez_output(text):
@@ -69,7 +73,9 @@ if __name__=="__main__":
     else:
         x = yaml.safe_load(sys.stdin)
     # 为代码高亮准备词法解析器的查找表
-    lexers = {"c":CLexer, "c++":CppLexer, "python":Python3Lexer, 
+    lexers = {"awk":AwkLexer, "c":CLexer, "c++":CppLexer, 
+              "python":Python3Lexer, "html":HtmlLexer,
+              "css":CssLexer, "markdown":MarkdownLexer,
               "scheme":SchemeLexer, "lua":LuaLexer, "tex":TexLexer, 
               "makefile":MakefileLexer, "gnuplot":GnuplotLexer,
               "plain":TextLexer, "elisp":EmacsLispLexer, "bash":BashLexer}
@@ -111,6 +117,8 @@ if __name__=="__main__":
                 orez_output('\n<span id="%s" class="orez-label">&lt;%s&gt;</span>'
                             % (tag_hash, tag["name"].strip("'")))
             # snippet content
+            if e["content"] is None:
+                e["content"] = [{'text':""}]
             for p in e["content"]:
                 if "text" in p:
                     lang = "plain"
@@ -127,12 +135,7 @@ if __name__=="__main__":
                     orez_output(hl_code)
                 else:
                     format_snippet_reference(p["reference"])
-                    orez_output('\n')
-            
-            # if last element is a piece of code snippet, 
-            # a linebreak should be append
-            if "text" in e["content"][-1]:
-                orez_output('\n')
+            orez_output('\n')
             # emissions 
             if "emissions" in e:
                 for p in e["emissions"]:
