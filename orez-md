@@ -17,6 +17,7 @@ from pygments.lexers import EmacsLispLexer
 from pygments.lexers import HtmlLexer
 from pygments.lexers import MarkdownLexer
 from pygments.lexers import CssLexer
+from pygments.lexers import YamlLexer
 from pygments.formatters import HtmlFormatter
 
 def orez_output(text):
@@ -75,7 +76,7 @@ if __name__=="__main__":
     # 为代码高亮准备词法解析器的查找表
     lexers = {"awk":AwkLexer, "c":CLexer, "c++":CppLexer, 
               "python":Python3Lexer, "html":HtmlLexer,
-              "css":CssLexer, "markdown":MarkdownLexer,
+              "css":CssLexer, "markdown":MarkdownLexer, "yaml":YamlLexer,
               "scheme":SchemeLexer, "lua":LuaLexer, "tex":TexLexer, 
               "makefile":MakefileLexer, "gnuplot":GnuplotLexer,
               "plain":TextLexer, "elisp":EmacsLispLexer, "bash":BashLexer}

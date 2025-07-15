@@ -292,4 +292,4 @@ If there is not any error occurs, this program should end up returning 0:
 
 ## More
 
-Please see <https://liyanrui.github.io/output/2025/orez-v1.html>
+Please see <https://liyanrui.github.io/2025/orez-v1.html>
